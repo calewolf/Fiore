@@ -1,15 +1,6 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//==============================================================================
 CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -22,10 +13,11 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
                        )
 #endif
 {
-    for (auto i = 0; i < 8; ++i)                // [1]
-        synth.addVoice (new SineWaveVoice());
-
-    synth.addSound (new SineWaveSound());       // [2]
+    for (auto i = 0; i < 8; ++i) {
+        synth.addVoice(new SineWaveVoice());
+    }
+        
+    synth.addSound(new SineWaveSound());
 }
 
 CapstoneSynthAudioProcessor::~CapstoneSynthAudioProcessor() {}
