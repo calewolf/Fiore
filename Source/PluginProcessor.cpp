@@ -40,8 +40,8 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-//    keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
-//    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 void CapstoneSynthAudioProcessor::releaseResources() {
