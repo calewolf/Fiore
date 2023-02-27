@@ -91,3 +91,4 @@ void Editor::sliderValueChanged(Slider* slider) {
         secondOscAmp = secondOscAmpSlider.getValue() / 100.0;
     }
 }
+
