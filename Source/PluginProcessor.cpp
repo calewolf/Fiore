@@ -13,7 +13,7 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
                        )
 #endif
 {
-    for (auto i = 0; i < 8; ++i) {
+    for (auto i = 0; i < 8; ++i) { // hwhhhauuah?
         synth.addVoice(new SineWaveVoice());
     }
         
