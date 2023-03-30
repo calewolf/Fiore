@@ -10,6 +10,7 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound) {
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
     osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+    gain.setGainLinear(velocity * 0.15);
     adsr.noteOn();
 }
 
@@ -81,8 +82,6 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     
     osc.prepare(spec);
     gain.prepare(spec);
-    
-    gain.setGainLinear(0.05f);
     
     isPrepared = true;
 }

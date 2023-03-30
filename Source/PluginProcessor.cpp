@@ -13,7 +13,9 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
                        )
 #endif
 {
-    synth.addVoice(new SynthVoice());
+    for (int i = 0; i < 16; i++) {
+        synth.addVoice(new SynthVoice());
+    }
     synth.addSound(new SynthSound());
 }
 
