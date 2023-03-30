@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "SineWaveVoice.h"
+#include "SynthVoice.h"
 
 //==============================================================================
 /**

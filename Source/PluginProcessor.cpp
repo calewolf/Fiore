@@ -13,26 +13,34 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
                        )
 #endif
 {
-    for (auto i = 0; i < 8; ++i) { // hwhhhauuah?
-        synth.addVoice(new SineWaveVoice());
-    }
-        
-    synth.addSound(new SineWaveSound());
+    synth.addVoice(new SynthVoice());
+    synth.addSound(new SynthSound());
 }
 
 CapstoneSynthAudioProcessor::~CapstoneSynthAudioProcessor() {}
 
 void CapstoneSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
-    synth.setCurrentPlaybackSampleRate (sampleRate);
+    synth.setCurrentPlaybackSampleRate(sampleRate);
+    
+    for (int i = 0; i < synth.getNumVoices(); i++) {
+        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i))) {
+            voice->prepareToPlay (sampleRate, samplesPerBlock, getTotalNumOutputChannels());
+        }
+    }
 }
 
 void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-    // Included to clear garbage from buffers for when # outputs > # inputs
-    // Prevents crazy loud feedback
-    for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+    // Clear garbage from buffers for when # outputs > # inputs. Otherwise feedback!
+    for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i) {
         buffer.clear (i, 0, buffer.getNumSamples());
+    }
     
+    // TODO: Update each voice with values from GUI parameters
+        
+    // Update the keyboardState with the latest MIDI information
     keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    
+    // Get audio from the synth. Will call renderNextBlock for all the synth voices
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
