@@ -25,6 +25,7 @@ class SynthVoice: public juce::SynthesiserVoice {
     private:
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;
+        juce::AudioBuffer<float> synthBuffer;
     
         juce::dsp::Oscillator<float> osc;
         juce::dsp::Gain<float> gain;
