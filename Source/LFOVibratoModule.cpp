@@ -9,10 +9,16 @@ LFOTab::LFOTab(const String& title) {
     lfoShapeLabel.setText("Shape", juce::dontSendNotification);
     lfoShapeLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawUpButton);
+    sawUpButton.setRadioGroupId(RadioGroupID::group1);
     addAndMakeVisible(sawDownButton);
+    sawDownButton.setRadioGroupId(RadioGroupID::group1);
     addAndMakeVisible(triangleButton);
+    triangleButton.setRadioGroupId(RadioGroupID::group1);
     addAndMakeVisible(squareButton);
+    squareButton.setRadioGroupId(RadioGroupID::group1);
     addAndMakeVisible(noiseButton);
+    noiseButton.setRadioGroupId(RadioGroupID::group1);
+    triangleButton.setToggleState(true, juce::dontSendNotification);
     
     // Amount slider
     addAndMakeVisible(lfoAmountSlider);

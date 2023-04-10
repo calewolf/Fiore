@@ -2,18 +2,18 @@
 
 #include <JuceHeader.h>
 
-class FilterModule: public juce::Component {
+class FilterModule: public juce::Component, public juce::Button::Listener {
     public:
         FilterModule();
         ~FilterModule() override;
         void paint (juce::Graphics&) override;
         void resized() override;
+        void buttonClicked (juce::Button* button) override;
 
     private:
         juce::TextButton onOffButton {"On"};
         juce::ComboBox filterTypeMenu;
-        
-        // TODO: Insert filter GUI box
+    
         juce::Label cutoffSliderLabel, resonanceSliderLabel;
         juce::Slider cutoffSlider, resonanceSlider;
         

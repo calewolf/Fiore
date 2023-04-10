@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    OscillatorModule.h
-    Created: 9 Apr 2023 1:33:10pm
-    Author:  Cale Wolf
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include <JuceHeader.h>
@@ -25,7 +15,12 @@ class OscillatorModule: public juce::Component, ComboBox::Listener, Slider::List
         enum Waveform {
             Sine = 1,
             Sawtooth,
-            Square
+            Square,
+            Noise
+        };
+        enum RadioGroupID {
+            Osc1 = 1001,
+            Osc2 = 1002
         };
     
         // Radio buttons for choosing which waveforms to play

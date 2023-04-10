@@ -8,6 +8,9 @@ class LFOTab: public juce::Component {
         void paint (juce::Graphics&) override;
         void resized() override;
     private:
+        enum RadioGroupID {
+            group1 = 1001
+        };
         juce::Slider lfoAmountSlider, lfoRateSlider;
         juce::Label lfoAmountSliderLabel, lfoRateSliderLabel;
     

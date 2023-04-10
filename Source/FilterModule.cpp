@@ -5,6 +5,8 @@ FilterModule::FilterModule() {
     addAndMakeVisible(onOffButton);
     onOffButton.setToggleable(true);
     onOffButton.setClickingTogglesState(true);
+    onOffButton.addListener(this);
+    onOffButton.setToggleState(true, juce::sendNotification);
     
     addAndMakeVisible(filterTypeMenu);
     filterTypeMenu.setTextWhenNothingSelected("Select filter:");
@@ -134,4 +136,15 @@ void FilterModule::resized() {
         FlexItem(area.getWidth(), 104, row3)
     };
     parentFlexBox.performLayout(area.toFloat());
+}
+
+void FilterModule::buttonClicked(juce::Button* button) {
+    auto isOn = button->getToggleState();
+    button->setButtonText(isOn ? "On" : "Off");
+    
+    filterTypeMenu.setEnabled(isOn);
+    cutoffSlider.setEnabled(isOn);
+    resonanceSlider.setEnabled(isOn);
+    lfoSlider.setEnabled(isOn);
+    envSlider.setEnabled(isOn);
 }

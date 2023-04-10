@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    OscillatorModule.cpp
-    Created: 9 Apr 2023 1:33:10pm
-    Author:  Cale Wolf
-
-  ==============================================================================
-*/
-
 #include <JuceHeader.h>
 #include "OscillatorModule.h"
 
@@ -17,14 +7,23 @@ OscillatorModule::OscillatorModule() {
     osc1ShapeMenuLabel.setText("OSC 1", juce::dontSendNotification);
     osc1ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawButton1);
+    sawButton1.setRadioGroupId(RadioGroupID::Osc1);
+    sawButton1.setToggleState(true, juce::dontSendNotification);
     addAndMakeVisible(squareButton1);
+    squareButton1.setRadioGroupId(RadioGroupID::Osc1);
     addAndMakeVisible(noiseButton1);
+    noiseButton1.setRadioGroupId(RadioGroupID::Osc1);
+    
     addAndMakeVisible(osc2ShapeMenuLabel);
     osc2ShapeMenuLabel.setText("OSC 2", juce::dontSendNotification);
     osc2ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawButton2);
+    sawButton2.setRadioGroupId(RadioGroupID::Osc2);
+    sawButton2.setToggleState(true, juce::dontSendNotification);
     addAndMakeVisible(squareButton2);
+    squareButton2.setRadioGroupId(RadioGroupID::Osc2);
     addAndMakeVisible(triButton2);
+    triButton2.setRadioGroupId(RadioGroupID::Osc2);
     
     // Rotary sliders
     addAndMakeVisible(sineLevelSlider);
