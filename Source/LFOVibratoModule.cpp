@@ -6,7 +6,8 @@
 LFOTab::LFOTab(const String& title) {
     // Shape options
     addAndMakeVisible(lfoShapeLabel);
-    lfoShapeLabel.setText("Wave Shape", juce::dontSendNotification);
+    lfoShapeLabel.setText("Shape", juce::dontSendNotification);
+    lfoShapeLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawUpButton);
     addAndMakeVisible(sawDownButton);
     addAndMakeVisible(triangleButton);
@@ -17,9 +18,11 @@ LFOTab::LFOTab(const String& title) {
     addAndMakeVisible(lfoAmountSlider);
     lfoAmountSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     lfoAmountSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    lfoAmountSlider.setRange(-1.0, 1.0);
-    lfoAmountSlider.setValue(0.0);
-    lfoAmountSlider.setNumDecimalPlacesToDisplay(2);
+    lfoAmountSlider.setRange(0, 100);
+    lfoAmountSlider.setValue(25);
+    lfoAmountSlider.setDoubleClickReturnValue(true, 25);
+    lfoAmountSlider.setNumDecimalPlacesToDisplay(0);
+    lfoAmountSlider.setTextValueSuffix("%");
     
     addAndMakeVisible(lfoAmountSliderLabel);
     lfoAmountSliderLabel.setText("Amp", juce::dontSendNotification);
@@ -30,9 +33,12 @@ LFOTab::LFOTab(const String& title) {
     addAndMakeVisible(lfoRateSlider);
     lfoRateSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     lfoRateSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    lfoRateSlider.setRange(-1.0, 1.0);
-    lfoRateSlider.setValue(0.0);
+    lfoRateSlider.setRange(0.01, 200);
+    lfoRateSlider.setValue(1.0);
+    lfoRateSlider.setSkewFactorFromMidPoint(15);
+    lfoRateSlider.setDoubleClickReturnValue(true, 1.0);
     lfoRateSlider.setNumDecimalPlacesToDisplay(2);
+    lfoRateSlider.setTextValueSuffix("Hz");
     
     addAndMakeVisible(lfoRateSliderLabel);
     lfoRateSliderLabel.setText("Rate", juce::dontSendNotification);

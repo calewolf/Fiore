@@ -15,11 +15,13 @@ OscillatorModule::OscillatorModule() {
     // Oscillator shape combo boxes
     addAndMakeVisible(osc1ShapeMenuLabel);
     osc1ShapeMenuLabel.setText("OSC 1", juce::dontSendNotification);
+    osc1ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawButton1);
     addAndMakeVisible(squareButton1);
     addAndMakeVisible(noiseButton1);
     addAndMakeVisible(osc2ShapeMenuLabel);
     osc2ShapeMenuLabel.setText("OSC 2", juce::dontSendNotification);
+    osc2ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawButton2);
     addAndMakeVisible(squareButton2);
     addAndMakeVisible(triButton2);
@@ -28,9 +30,11 @@ OscillatorModule::OscillatorModule() {
     addAndMakeVisible(sineLevelSlider);
     sineLevelSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     sineLevelSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    sineLevelSlider.setRange(-1.0, 1.0);
-    sineLevelSlider.setValue(0.0);
-    sineLevelSlider.setNumDecimalPlacesToDisplay(2);
+    sineLevelSlider.setRange(0, 100);
+    sineLevelSlider.setDoubleClickReturnValue(true, 0);
+    sineLevelSlider.setTextValueSuffix("%");
+    sineLevelSlider.setValue(0);
+    sineLevelSlider.setNumDecimalPlacesToDisplay(0);
     
     addAndMakeVisible(sineLevelSliderLabel);
     sineLevelSliderLabel.setText("Sine Level", juce::dontSendNotification);
@@ -43,6 +47,7 @@ OscillatorModule::OscillatorModule() {
     vibratoSlider.setRange(0.0, 36.0);
     vibratoSlider.setTextValueSuffix(" st");
     vibratoSlider.setValue(0.0);
+    vibratoSlider.setDoubleClickReturnValue(true, 0.0);
     vibratoSlider.setNumDecimalPlacesToDisplay(1);
     
     addAndMakeVisible(vibratoSliderLabel);
@@ -56,6 +61,7 @@ OscillatorModule::OscillatorModule() {
     semitonesSlider.setRange(-24.0, 24.0);
     semitonesSlider.setTextValueSuffix(" st");
     semitonesSlider.setValue(0.0);
+    semitonesSlider.setDoubleClickReturnValue(true, 0);
     semitonesSlider.setNumDecimalPlacesToDisplay(0);
     
     addAndMakeVisible(semitonesSliderLabel);
@@ -69,6 +75,7 @@ OscillatorModule::OscillatorModule() {
     centsSlider.setRange(-50.0, 50.0);
     centsSlider.setTextValueSuffix(" c");
     centsSlider.setValue(0.0);
+    centsSlider.setDoubleClickReturnValue(true, 0);
     centsSlider.setNumDecimalPlacesToDisplay(0);
     
     addAndMakeVisible(centsSliderLabel);
@@ -82,6 +89,7 @@ OscillatorModule::OscillatorModule() {
     oscMixSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     oscMixSlider.setRange(0, 100);
     oscMixSlider.setValue(50.0);
+    oscMixSlider.setDoubleClickReturnValue(true, 50);
     
     addAndMakeVisible(oscMixSliderLabel1);
     oscMixSliderLabel1.setText("OSC1 Mix", juce::dontSendNotification);
@@ -105,6 +113,13 @@ void OscillatorModule::resized() {
     auto area = getLocalBounds();
     oscillatorModuleLabel.setBounds(area.removeFromBottom(area.getHeight() / 10));
     
+    auto lrMargin = area.getWidth() / 10;
+    auto tbMargin = area.getHeight() / 10;
+    area.removeFromTop(tbMargin);
+    area.removeFromBottom(tbMargin);
+    area.removeFromLeft(lrMargin);
+    area.removeFromRight(lrMargin);
+    
     // OSC selector radio buttons
     juce::FlexBox fb0;
     fb0.flexDirection = FlexBox::Direction::column;
@@ -125,40 +140,44 @@ void OscillatorModule::resized() {
     // Rotary knobs column 1
     juce::FlexBox fb1;
     fb1.flexDirection = FlexBox::Direction::column;
-    fb1.justifyContent = FlexBox::JustifyContent::spaceAround;
+    fb1.justifyContent = FlexBox::JustifyContent::spaceBetween;
     fb1.alignItems = FlexBox::AlignItems::center;
     juce::FlexItem::Margin margin (24, 0, 0, 0);
     fb1.items = {
-        juce::FlexItem(sineLevelSlider).withWidth(90).withHeight(90).withMargin(margin),
-        juce::FlexItem(semitonesSlider).withWidth(90).withHeight(90).withMargin(margin)
+        juce::FlexItem(sineLevelSlider).withWidth(80).withHeight(80).withMargin(margin),
+        juce::FlexItem(semitonesSlider).withWidth(80).withHeight(80).withMargin(margin)
     };
     
     // Rotary knobs column 2
-    juce::FlexBox fb2 (FlexBox::Direction::column, FlexBox::Wrap::noWrap, FlexBox::AlignContent::center, FlexBox::AlignItems::center, FlexBox::JustifyContent::spaceAround);
-    fb2.items.add(juce::FlexItem(vibratoSlider).withWidth(90).withHeight(90).withMargin(margin));
-    fb2.items.add(juce::FlexItem(centsSlider).withWidth(90).withHeight(90).withMargin(margin));
+    juce::FlexBox fb2;
+    fb2.flexDirection = FlexBox::Direction::column;
+    fb2.justifyContent = FlexBox::JustifyContent::spaceBetween;
+    fb2.alignItems = FlexBox::AlignItems::center;
+    fb2.items = {
+        juce::FlexItem(vibratoSlider).withWidth(80).withHeight(80).withMargin(margin),
+        juce::FlexItem(centsSlider).withWidth(80).withHeight(80).withMargin(margin)
+    };
     
     // Osc mix slider
     juce::FlexBox fb3;
     fb3.flexDirection = FlexBox::Direction::column;
-    fb3.justifyContent = FlexBox::JustifyContent::center;;
-    fb3.alignItems = FlexBox::AlignItems::center;;
+    fb3.justifyContent = FlexBox::JustifyContent::center;
+    fb3.alignItems = FlexBox::AlignItems::center;
+    fb3.alignContent = FlexBox::AlignContent::stretch;
     fb3.items = {
         juce::FlexItem(oscMixSliderLabel1).withWidth(70).withHeight(24),
-        juce::FlexItem(oscMixSlider).withWidth(30).withHeight(200),
+        juce::FlexItem(oscMixSlider).withWidth(30).withMinHeight(100).withFlex(1),
         juce::FlexItem(oscMixSliderLabel2).withWidth(70).withHeight(24)
     };
     
     // Lay out into a parent flexbox!
-    auto quarterWidth = area.getWidth() / 4;
     juce::FlexBox parentFlexBox;
-    parentFlexBox.justifyContent = FlexBox::JustifyContent::center;
-    parentFlexBox.flexDirection = FlexBox::Direction::row;
+    parentFlexBox.justifyContent = FlexBox::JustifyContent::spaceAround;
     parentFlexBox.items = {
-        FlexItem(quarterWidth, area.getHeight(), fb0),
-        FlexItem(quarterWidth, area.getHeight(), fb1),
-        FlexItem(quarterWidth, area.getHeight(), fb2),
-        FlexItem(quarterWidth, area.getHeight(), fb3)
+        FlexItem(70, area.getHeight(), fb0),
+        FlexItem(80, area.getHeight(), fb1),
+        FlexItem(80, area.getHeight(), fb2),
+        FlexItem(70, area.getHeight(), fb3)
     };
     parentFlexBox.performLayout(area.toFloat());
 }

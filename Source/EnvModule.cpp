@@ -12,7 +12,13 @@ EnvTab::EnvTab(const String& title) {
     addAndMakeVisible(attackSlider);
     attackSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     attackSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    attackSlider.setNumDecimalPlacesToDisplay(2);
+    attackSlider.setRange(0.0, 10000.0);
+    attackSlider.setDoubleClickReturnValue(true, 0.4);
+    attackSlider.setTextValueSuffix("ms");
+    attackSlider.setValue(0.4);
+    attackSlider.setSkewFactorFromMidPoint(250.0);
+    attackSlider.setNumDecimalPlacesToDisplay(1);
+    
     addAndMakeVisible(attackSliderLabel);
     attackSliderLabel.setText("Atk", juce::dontSendNotification);
     attackSliderLabel.setJustificationType(juce::Justification::centred);
@@ -22,7 +28,13 @@ EnvTab::EnvTab(const String& title) {
     addAndMakeVisible(decaySlider);
     decaySlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     decaySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    decaySlider.setNumDecimalPlacesToDisplay(2);
+    decaySlider.setRange(0.0, 10000.0);
+    decaySlider.setDoubleClickReturnValue(true, 520.0);
+    decaySlider.setTextValueSuffix("ms");
+    decaySlider.setValue(520.0);
+    decaySlider.setSkewFactorFromMidPoint(320.0);
+    decaySlider.setNumDecimalPlacesToDisplay(1);
+    
     addAndMakeVisible(decaySliderLabel);
     decaySliderLabel.setText("Dec", juce::dontSendNotification);
     decaySliderLabel.setJustificationType(juce::Justification::centred);
@@ -32,7 +44,13 @@ EnvTab::EnvTab(const String& title) {
     addAndMakeVisible(sustainSlider);
     sustainSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    sustainSlider.setNumDecimalPlacesToDisplay(2);
+    sustainSlider.setRange(0, 100);
+    sustainSlider.setDoubleClickReturnValue(true, 75);
+    sustainSlider.setTextValueSuffix("%");
+    sustainSlider.setValue(75);
+    sustainSlider.setSkewFactorFromMidPoint(25);
+    sustainSlider.setNumDecimalPlacesToDisplay(0);
+    
     addAndMakeVisible(sustainSliderLabel);
     sustainSliderLabel.setText("Sus", juce::dontSendNotification);
     sustainSliderLabel.setJustificationType(juce::Justification::centred);
@@ -42,7 +60,13 @@ EnvTab::EnvTab(const String& title) {
     addAndMakeVisible(releaseSlider);
     releaseSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
     releaseSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    releaseSlider.setNumDecimalPlacesToDisplay(2);
+    releaseSlider.setRange(1.0, 10000.0);
+    releaseSlider.setDoubleClickReturnValue(true, 270.0);
+    releaseSlider.setTextValueSuffix("ms");
+    releaseSlider.setValue(270.0);
+    releaseSlider.setSkewFactorFromMidPoint(1000.0);
+    releaseSlider.setNumDecimalPlacesToDisplay(1);
+    
     addAndMakeVisible(releaseSliderLabel);
     releaseSliderLabel.setText("Rel", juce::dontSendNotification);
     releaseSliderLabel.setJustificationType(juce::Justification::centred);
