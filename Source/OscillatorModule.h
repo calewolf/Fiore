@@ -34,8 +34,8 @@ class OscillatorModule: public juce::Component, ComboBox::Listener, Slider::List
         juce::ToggleButton sawButton2 {"Saw"}, squareButton2 {"Square"}, triButton2 {"Tri"};
     
         // Various oscillator parameters
-        juce::Label shapeModulationSliderLabel, vibratoSliderLabel, semitonesSliderLabel, centsSliderLabel;
-        juce::Slider shapeModulationSlider, vibratoSlider, semitonesSlider, centsSlider;
+        juce::Label sineLevelSliderLabel, vibratoSliderLabel, semitonesSliderLabel, centsSliderLabel;
+        juce::Slider sineLevelSlider, vibratoSlider, semitonesSlider, centsSlider;
     
         // Mix of % OSC1 vs. % OSC2
         juce::Label oscMixSliderLabel1, oscMixSliderLabel2;

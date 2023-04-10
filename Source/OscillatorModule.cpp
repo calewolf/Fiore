@@ -25,20 +25,20 @@ OscillatorModule::OscillatorModule() {
     addAndMakeVisible(triButton2);
     
     // Rotary sliders
-    addAndMakeVisible(shapeModulationSlider);
-    shapeModulationSlider.setSliderStyle(Slider::SliderStyle::Rotary);
-    shapeModulationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    shapeModulationSlider.setRange(-1.0, 1.0);
-    shapeModulationSlider.setValue(0.0);
-    shapeModulationSlider.setNumDecimalPlacesToDisplay(2);
+    addAndMakeVisible(sineLevelSlider);
+    sineLevelSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    sineLevelSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
+    sineLevelSlider.setRange(-1.0, 1.0);
+    sineLevelSlider.setValue(0.0);
+    sineLevelSlider.setNumDecimalPlacesToDisplay(2);
     
-    addAndMakeVisible(shapeModulationSliderLabel);
-    shapeModulationSliderLabel.setText("Shape Mod", juce::dontSendNotification);
-    shapeModulationSliderLabel.setJustificationType(juce::Justification::centred);
-    shapeModulationSliderLabel.attachToComponent(&shapeModulationSlider, false);
+    addAndMakeVisible(sineLevelSliderLabel);
+    sineLevelSliderLabel.setText("Sine Level", juce::dontSendNotification);
+    sineLevelSliderLabel.setJustificationType(juce::Justification::centred);
+    sineLevelSliderLabel.attachToComponent(&sineLevelSlider, false);
     
     addAndMakeVisible(vibratoSlider);
-    vibratoSlider.setSliderStyle(Slider::SliderStyle::Rotary);
+    vibratoSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     vibratoSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
     vibratoSlider.setRange(0.0, 36.0);
     vibratoSlider.setTextValueSuffix(" st");
@@ -51,7 +51,7 @@ OscillatorModule::OscillatorModule() {
     vibratoSliderLabel.attachToComponent(&vibratoSlider, false);
     
     addAndMakeVisible(semitonesSlider);
-    semitonesSlider.setSliderStyle(Slider::SliderStyle::Rotary);
+    semitonesSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     semitonesSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
     semitonesSlider.setRange(-24.0, 24.0);
     semitonesSlider.setTextValueSuffix(" st");
@@ -64,7 +64,7 @@ OscillatorModule::OscillatorModule() {
     semitonesSliderLabel.attachToComponent(&semitonesSlider, false);
     
     addAndMakeVisible(centsSlider);
-    centsSlider.setSliderStyle(Slider::SliderStyle::Rotary);
+    centsSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     centsSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
     centsSlider.setRange(-50.0, 50.0);
     centsSlider.setTextValueSuffix(" c");
@@ -98,7 +98,7 @@ OscillatorModule::OscillatorModule() {
 OscillatorModule::~OscillatorModule() {};
 
 void OscillatorModule::paint(juce::Graphics& g) {
-    g.fillAll(juce::Colours::lightsalmon);
+    g.fillAll(juce::Colours::slategrey);
 }
 
 void OscillatorModule::resized() {
@@ -129,7 +129,7 @@ void OscillatorModule::resized() {
     fb1.alignItems = FlexBox::AlignItems::center;
     juce::FlexItem::Margin margin (24, 0, 0, 0);
     fb1.items = {
-        juce::FlexItem(shapeModulationSlider).withWidth(90).withHeight(90).withMargin(margin),
+        juce::FlexItem(sineLevelSlider).withWidth(90).withHeight(90).withMargin(margin),
         juce::FlexItem(semitonesSlider).withWidth(90).withHeight(90).withMargin(margin)
     };
     

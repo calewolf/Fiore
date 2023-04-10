@@ -5,35 +5,33 @@ Editor::Editor (CapstoneSynthAudioProcessor& p): AudioProcessorEditor (&p), audi
     addAndMakeVisible(oscModule);
     addAndMakeVisible(filterModule);
     addAndMakeVisible(ampModule);
-    addAndMakeVisible(fxModule);
-    addAndMakeVisible(bendModule);
     addAndMakeVisible(lfoVibratoModule);
-    addAndMakeVisible(filterEnvModule);
-    addAndMakeVisible(ampEnvModule);
+    addAndMakeVisible(envModule);
     
-    setSize (1050, 600);
+    setSize (770, 615);
 }
 
 Editor::~Editor() {
 }
 
 void Editor::resized() {
-    auto area = getLocalBounds();
+    auto area = getLocalBounds().reduced(5);
     
     auto topRow = area.removeFromTop(300);
+    area.removeFromTop(5);
     auto bottomRow = area;
     
-    oscModule.setBounds(topRow.removeFromLeft(450));
+    oscModule.setBounds(topRow.removeFromLeft(455));
+    topRow.removeFromLeft(5);
     filterModule.setBounds(topRow.removeFromLeft(300));
-    ampModule.setBounds(topRow.removeFromLeft(150));
-    fxModule.setBounds(topRow.removeFromLeft(150));
     
-    bendModule.setBounds(bottomRow.removeFromLeft(150));
+    ampModule.setBounds(bottomRow.removeFromLeft(150));
+    bottomRow.removeFromLeft(5);
     lfoVibratoModule.setBounds(bottomRow.removeFromLeft(300));
-    filterEnvModule.setBounds(bottomRow.removeFromLeft(300));
-    ampEnvModule.setBounds(bottomRow.removeFromLeft(300));
+    bottomRow.removeFromLeft(5);
+    envModule.setBounds(bottomRow.removeFromLeft(300));
 }
 
-void Editor::paint(juce::Graphics&) {
-    
+void Editor::paint(juce::Graphics& g) {
+    g.fillAll(juce::Colours::whitesmoke);
 }

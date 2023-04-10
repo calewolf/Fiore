@@ -10,8 +10,8 @@ class AmpModule: public juce::Component {
         void resized() override;
 
     private:
-        juce::Label volumeSliderLabel, sineLevelSliderLabel;
-        juce::Slider volumeSlider, sineLevelSlider;
+        juce::Label volumeSliderLabel;
+        juce::Slider volumeSlider;
         
         juce::Label ampModuleLabel;
     

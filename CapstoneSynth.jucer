@@ -7,22 +7,13 @@
   <MAINGROUP id="r0AylI" name="Capstone Synth">
     <GROUP id="{DCF86FA3-59A6-7823-1502-BB8229A76F32}" name="Source">
       <GROUP id="{187C7D2A-896F-89E9-34CA-841C75700541}" name="Components">
-        <FILE id="oGwsbh" name="AmpEnvModule.cpp" compile="1" resource="0"
-              file="Source/AmpEnvModule.cpp"/>
-        <FILE id="TTQKNl" name="AmpEnvModule.h" compile="0" resource="0" file="Source/AmpEnvModule.h"/>
         <FILE id="bUZeUA" name="AmpModule.cpp" compile="1" resource="0" file="Source/AmpModule.cpp"/>
         <FILE id="aFToOR" name="AmpModule.h" compile="0" resource="0" file="Source/AmpModule.h"/>
-        <FILE id="YqHL6C" name="BendModule.cpp" compile="1" resource="0" file="Source/BendModule.cpp"/>
-        <FILE id="Xfa9Yu" name="BendModule.h" compile="0" resource="0" file="Source/BendModule.h"/>
-        <FILE id="vc8Tn5" name="FilterEnvModule.cpp" compile="1" resource="0"
-              file="Source/FilterEnvModule.cpp"/>
-        <FILE id="kYFBUt" name="FilterEnvModule.h" compile="0" resource="0"
-              file="Source/FilterEnvModule.h"/>
+        <FILE id="PjP8wQ" name="EnvModule.cpp" compile="1" resource="0" file="Source/EnvModule.cpp"/>
+        <FILE id="nXIhUi" name="EnvModule.h" compile="0" resource="0" file="Source/EnvModule.h"/>
         <FILE id="a25NH2" name="FilterModule.cpp" compile="1" resource="0"
               file="Source/FilterModule.cpp"/>
         <FILE id="lkoLho" name="FilterModule.h" compile="0" resource="0" file="Source/FilterModule.h"/>
-        <FILE id="i2Foap" name="FxModule.cpp" compile="1" resource="0" file="Source/FxModule.cpp"/>
-        <FILE id="Xye9Oj" name="FxModule.h" compile="0" resource="0" file="Source/FxModule.h"/>
         <FILE id="qk0nLb" name="LFOVibratoModule.cpp" compile="1" resource="0"
               file="Source/LFOVibratoModule.cpp"/>
         <FILE id="HgCM5v" name="LFOVibratoModule.h" compile="0" resource="0"

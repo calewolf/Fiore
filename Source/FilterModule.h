@@ -14,11 +14,11 @@ class FilterModule: public juce::Component {
         juce::ComboBox filterTypeMenu;
         
         // TODO: Insert filter GUI box
-        juce::Slider keySlider;
-        juce::Label keySliderLabel;
+        juce::Label cutoffSliderLabel, resonanceSliderLabel;
+        juce::Slider cutoffSlider, resonanceSlider;
         
-        juce::Label filterFMSliderLabel, lfoSliderLabel, envSliderLabel;
-        juce::Slider filterFMSlider, lfoSlider, envSlider;
+        juce::Label lfoSliderLabel, envSliderLabel;
+        juce::Slider lfoSlider, envSlider;
         
         juce::Label filterModuleLabel;
         

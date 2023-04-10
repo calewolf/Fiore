@@ -14,12 +14,8 @@
 #include "OscillatorModule.h"
 #include "FilterModule.h"
 #include "AmpModule.h"
-#include "FxModule.h"
-#include "BendModule.h"
 #include "LFOVibratoModule.h"
-#include "FilterEnvModule.h"
-#include "AmpEnvModule.h"
-
+#include "EnvModule.h"
 
 class Editor: public AudioProcessorEditor {
     
@@ -33,11 +29,8 @@ private:
     OscillatorModule oscModule;
     FilterModule filterModule;
     AmpModule ampModule;
-    FxModule fxModule;
-    BendModule bendModule;
     LFOVibratoModule lfoVibratoModule;
-    FilterEnvModule filterEnvModule;
-    AmpEnvModule ampEnvModule;
+    EnvModule envModule;
     
     CapstoneSynthAudioProcessor& audioProcessor;
 
