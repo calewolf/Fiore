@@ -49,6 +49,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     releaseRange.setSkewForCentre(0.5);
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_REL", 1), "Amp Release", releaseRange, 0.038));
     
+    juce::NormalisableRange<float> gainRange {-84.0, 12.0, 0.1};
+    gainRange.setSkewForCentre(-9.0);
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("GAIN", 1), "Global Gain", gainRange, 0.0));
+    
     return { params.begin(), params.end() };
 }
 
@@ -66,7 +70,10 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             double sustain = (*apvts.getRawParameterValue("AMP_SUS")) / 100.0;
             auto& release = *apvts.getRawParameterValue("AMP_REL");
             
+            auto& gain = *apvts.getRawParameterValue("GAIN");
+            
             voice->updateADSR(attack.load(), decay.load(), sustain, release.load());
+            voice->updateGain(gain.load());
         }
     }
     

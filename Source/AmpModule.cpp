@@ -1,17 +1,16 @@
 #include <JuceHeader.h>
 #include "AmpModule.h"
 
-AmpModule::AmpModule() {
+AmpModule::AmpModule(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
     // Volume slider
     addAndMakeVisible(volumeSlider);
     volumeSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     volumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    volumeSlider.setRange(-84, 12);
-    volumeSlider.setValue(0);
     volumeSlider.setDoubleClickReturnValue(true, 0);
     volumeSlider.setTextValueSuffix(" dB");
-    volumeSlider.setSkewFactorFromMidPoint(-9);
     volumeSlider.setNumDecimalPlacesToDisplay(1);
+    
+    gainAttachment = std::make_unique<SliderAttachment>(apvts, "GAIN", volumeSlider);
     
     addAndMakeVisible(volumeSliderLabel);
     volumeSliderLabel.setText("Volume", juce::dontSendNotification);

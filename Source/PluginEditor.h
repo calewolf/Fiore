@@ -27,12 +27,12 @@ public:
 
 private:
     CapstoneSynthAudioProcessor& audioProcessor;
-    
     OscillatorModule oscModule;
     FilterModule filterModule;
-    AmpModule ampModule;
+    
     LFOVibratoModule lfoVibratoModule;
     EnvModule envModule { audioProcessor.getAPVTS() };
+    AmpModule ampModule;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)
 };

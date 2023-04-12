@@ -10,7 +10,7 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound) {
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
     osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
-    gain.setGainLinear(velocity * 0.15);
+    velocityGain.setGainLinear(velocity * 0.50); // TODO: Set a better velocity curve here?
     adsr.noteOn();
 }
 
@@ -57,14 +57,21 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     // Apply signal processing to our buffer
     // This is a shortcut around writing everything myself (i.e. oscillators, adsr envelopes, etc.)
     juce::dsp::AudioBlock<float> audioBlock {synthBuffer};
-    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    
+    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // fill the buffer with signals from the current osc
+    
+    velocityGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // adjust volume based on how hard the note was hit
+    
+    globalGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // more gain adjustment, from the "AMP" gain knob
+    
     adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
     
     // Add the current channel's audio data to the larger outputBuffer
     for (int channel = 0; channel < outputBuffer.getNumChannels(); channel++) {
         outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
     }
+    
+    
     
     // When the ADSR finishes its tail-off, we need to call this to reset the state of the note.
     if (!adsr.isActive()) {
@@ -73,6 +80,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 }
 
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels) {
+    globalGain.reset();
+    velocityGain.reset();
+    adsr.reset();
+    
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
@@ -80,7 +91,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     
     adsr.setSampleRate(sampleRate);
     osc.prepare(spec);
-    gain.prepare(spec);
+    globalGain.prepare(spec);
+    velocityGain.prepare(spec);
     
     isPrepared = true;
 }
@@ -91,4 +103,8 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
     adsrParams.sustain = sustain;
     adsrParams.release = release;
     adsr.setParameters(adsrParams);
+}
+
+void SynthVoice::updateGain (const float gainDecibels) {
+    globalGain.setGainDecibels(gainDecibels);
 }

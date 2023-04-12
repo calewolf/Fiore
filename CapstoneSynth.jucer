@@ -23,6 +23,8 @@
         <FILE id="NLiJ8h" name="OscillatorModule.h" compile="0" resource="0"
               file="Source/OscillatorModule.h"/>
       </GROUP>
+      <FILE id="KCbKiS" name="CustomOsc.cpp" compile="1" resource="0" file="Source/CustomOsc.cpp"/>
+      <FILE id="FZRGNx" name="CustomOsc.h" compile="0" resource="0" file="Source/CustomOsc.h"/>
       <FILE id="pPYfkx" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
       <FILE id="ZhTdpF" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>
       <FILE id="NQARYm" name="PluginProcessor.cpp" compile="1" resource="0"

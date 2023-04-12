@@ -24,13 +24,15 @@ class SynthVoice: public juce::SynthesiserVoice {
     
         /// Updates the value of `adsrParams` to change the amplitude's ADSR. Called from `pluginProcessor`.
         void updateADSR (const float attack, const float decay, const float sustain, const float release);
-    
+        void updateGain (const float gainDecibels);
     private:
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;
         juce::AudioBuffer<float> synthBuffer;
     
         juce::dsp::Oscillator<float> osc;
-        juce::dsp::Gain<float> gain;
+        juce::dsp::Gain<float> velocityGain;
+    
+        juce::dsp::Gain<float> globalGain;
         bool isPrepared {false};
 };

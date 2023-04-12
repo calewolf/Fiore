@@ -25,7 +25,7 @@ class EnvTab: public juce::Component {
 
 class EnvModule: public juce::Component {
     public:
-        EnvModule(juce::AudioProcessorValueTreeState& parentAPVTS);
+        EnvModule(juce::AudioProcessorValueTreeState& apvts);
         ~EnvModule() override;
         void paint (juce::Graphics&) override;
         void resized() override;
