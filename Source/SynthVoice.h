@@ -22,6 +22,9 @@ class SynthVoice: public juce::SynthesiserVoice {
         
         void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
     
+        /// Updates the value of `adsrParams` to change the amplitude's ADSR. Called from `pluginProcessor`.
+        void updateADSR (const float attack, const float decay, const float sustain, const float release);
+    
     private:
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;

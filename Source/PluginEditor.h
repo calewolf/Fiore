@@ -26,13 +26,13 @@ public:
     void resized() override;
 
 private:
+    CapstoneSynthAudioProcessor& audioProcessor;
+    
     OscillatorModule oscModule;
     FilterModule filterModule;
     AmpModule ampModule;
     LFOVibratoModule lfoVibratoModule;
-    EnvModule envModule;
-    
-    CapstoneSynthAudioProcessor& audioProcessor;
+    EnvModule envModule { audioProcessor.getAPVTS() };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)
 };

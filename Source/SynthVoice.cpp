@@ -73,15 +73,22 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 }
 
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels) {
-    adsr.setSampleRate(sampleRate);
-    
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = outputChannels;
     
+    adsr.setSampleRate(sampleRate);
     osc.prepare(spec);
     gain.prepare(spec);
     
     isPrepared = true;
+}
+
+void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release) {
+    adsrParams.attack = attack;
+    adsrParams.decay = decay;
+    adsrParams.sustain = sustain;
+    adsrParams.release = release;
+    adsr.setParameters(adsrParams);
 }

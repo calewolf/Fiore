@@ -23,8 +23,7 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    
-    juce::MidiKeyboardState* getMidiKeyboardState();
+    juce::AudioProcessorValueTreeState& getAPVTS();
     
     // Buncha JUCE Garbage
    #ifndef JucePlugin_PreferredChannelConfigurations
@@ -46,9 +45,10 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
 private:
-    juce::MidiKeyboardState keyboardState;
     juce::Synthesiser synth;
-    juce::MidiMessageCollector midiCollector;
+    juce::AudioProcessorValueTreeState apvts;
+    
+    juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CapstoneSynthAudioProcessor)
 };

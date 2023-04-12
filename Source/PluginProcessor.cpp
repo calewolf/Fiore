@@ -10,7 +10,7 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts(*this, nullptr, "Parameters", createParams())
 #endif
 {
     for (int i = 0; i < 16; i++) {
@@ -31,16 +31,44 @@ void CapstoneSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     }
 }
 
+juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor::createParams() {
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+    
+    juce::NormalisableRange<float> attackRange {0.0001, 10.0, 0.0001}; // sec
+    attackRange.setSkewForCentre(0.41);
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_ATK", 1), "Amp Attack", attackRange, 0.0004));
+    
+    juce::NormalisableRange<float> decayRange {0.0001, 10.0, 0.0001}; // sec
+    decayRange.setSkewForCentre(0.41);
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_DEC", 1), "Amp Decay", decayRange, 0.520));
+    
+    juce::NormalisableRange<float> sustainRange {1, 100, 1}; // %
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_SUS", 1), "Amp Sustain", sustainRange, 75));
+    
+    juce::NormalisableRange<float> releaseRange {0.001, 10.0, 0.001}; // sec
+    releaseRange.setSkewForCentre(0.5);
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_REL", 1), "Amp Release", releaseRange, 0.038));
+    
+    return { params.begin(), params.end() };
+}
+
 void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
     // Clear garbage from buffers for when # outputs > # inputs. Otherwise feedback!
     for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i) {
         buffer.clear (i, 0, buffer.getNumSamples());
     }
     
-    // TODO: Update each voice with values from GUI parameters
-        
-    // Update the keyboardState with the latest MIDI information
-    keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    // Update each voice with current values from our parameters
+    for (int i = 0; i < synth.getNumVoices(); i++) {
+        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i))) {
+            auto& attack = *apvts.getRawParameterValue("AMP_ATK");
+            auto& decay = *apvts.getRawParameterValue("AMP_DEC");
+            double sustain = (*apvts.getRawParameterValue("AMP_SUS")) / 100.0;
+            auto& release = *apvts.getRawParameterValue("AMP_REL");
+            
+            voice->updateADSR(attack.load(), decay.load(), sustain, release.load());
+        }
+    }
     
     // Get audio from the synth. Will call renderNextBlock for all the synth voices
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
@@ -50,8 +78,8 @@ void CapstoneSynthAudioProcessor::releaseResources() {
     
 }
 
-juce::MidiKeyboardState* CapstoneSynthAudioProcessor::getMidiKeyboardState() {
-    return &keyboardState;
+juce::AudioProcessorValueTreeState& CapstoneSynthAudioProcessor::getAPVTS() {
+    return apvts;
 }
 
 //==============================================================================

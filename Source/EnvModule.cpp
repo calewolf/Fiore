@@ -1,7 +1,7 @@
 #include <JuceHeader.h>
 #include "EnvModule.h"
 
-EnvTab::EnvTab(const String& title) {
+EnvTab::EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
     // Title label
     addAndMakeVisible(titleLabel);
     titleLabel.setText(title, juce::dontSendNotification);
@@ -9,68 +9,37 @@ EnvTab::EnvTab(const String& title) {
     titleLabel.setJustificationType(juce::Justification::centred);
     
     // Attack
-    addAndMakeVisible(attackSlider);
-    attackSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-    attackSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    attackSlider.setRange(0.0, 10000.0);
-    attackSlider.setDoubleClickReturnValue(true, 0.4);
-    attackSlider.setTextValueSuffix("ms");
-    attackSlider.setValue(0.4);
-    attackSlider.setSkewFactorFromMidPoint(250.0);
-    attackSlider.setNumDecimalPlacesToDisplay(1);
-    
-    addAndMakeVisible(attackSliderLabel);
-    attackSliderLabel.setText("Atk", juce::dontSendNotification);
-    attackSliderLabel.setJustificationType(juce::Justification::centred);
-    attackSliderLabel.attachToComponent(&attackSlider, false);
+    configureSlider(attackSlider, "s", 1, "AMP_ATK", attackAttachment);
+    configureLabel(attackSlider, attackSliderLabel, "Atk");
     
     // Decay
-    addAndMakeVisible(decaySlider);
-    decaySlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-    decaySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    decaySlider.setRange(0.0, 10000.0);
-    decaySlider.setDoubleClickReturnValue(true, 520.0);
-    decaySlider.setTextValueSuffix("ms");
-    decaySlider.setValue(520.0);
-    decaySlider.setSkewFactorFromMidPoint(320.0);
-    decaySlider.setNumDecimalPlacesToDisplay(1);
-    
-    addAndMakeVisible(decaySliderLabel);
-    decaySliderLabel.setText("Dec", juce::dontSendNotification);
-    decaySliderLabel.setJustificationType(juce::Justification::centred);
-    decaySliderLabel.attachToComponent(&decaySlider, false);
+    configureSlider(decaySlider, "s", 1, "AMP_DEC", decayAttachment);
+    configureLabel(decaySlider, decaySliderLabel, "Dec");
     
     // Sustain
-    addAndMakeVisible(sustainSlider);
-    sustainSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-    sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    sustainSlider.setRange(0, 100);
-    sustainSlider.setDoubleClickReturnValue(true, 75);
-    sustainSlider.setTextValueSuffix("%");
-    sustainSlider.setValue(75);
-    sustainSlider.setSkewFactorFromMidPoint(25);
-    sustainSlider.setNumDecimalPlacesToDisplay(0);
-    
-    addAndMakeVisible(sustainSliderLabel);
-    sustainSliderLabel.setText("Sus", juce::dontSendNotification);
-    sustainSliderLabel.setJustificationType(juce::Justification::centred);
-    sustainSliderLabel.attachToComponent(&sustainSlider, false);
+    configureSlider(sustainSlider, "%", 0, "AMP_SUS", sustainAttachment);
+    configureLabel(sustainSlider, sustainSliderLabel, "Sus");
     
     // Release
-    addAndMakeVisible(releaseSlider);
-    releaseSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-    releaseSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
-    releaseSlider.setRange(1.0, 10000.0);
-    releaseSlider.setDoubleClickReturnValue(true, 270.0);
-    releaseSlider.setTextValueSuffix("ms");
-    releaseSlider.setValue(270.0);
-    releaseSlider.setSkewFactorFromMidPoint(1000.0);
-    releaseSlider.setNumDecimalPlacesToDisplay(1);
-    
-    addAndMakeVisible(releaseSliderLabel);
-    releaseSliderLabel.setText("Rel", juce::dontSendNotification);
-    releaseSliderLabel.setJustificationType(juce::Justification::centred);
-    releaseSliderLabel.attachToComponent(&releaseSlider, false);
+    configureSlider(releaseSlider, "s", 1, "AMP_REL", releaseAttachment);
+    configureLabel(releaseSlider, releaseSliderLabel, "Rel");
+}
+
+void EnvTab::configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate) {
+    addAndMakeVisible(slider);
+    slider.setSliderStyle(Slider::SliderStyle::LinearVertical);
+    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 24);
+    slider.setTextValueSuffix(textValueSuffix);
+    slider.setNumDecimalPlacesToDisplay(numDecimalPlacesToDisplay);
+    slider.setDoubleClickReturnValue(true, apvts.getParameter(paramID)->getDefaultValue());
+    attachmentToCreate = std::make_unique<SliderAttachment>(apvts, paramID, slider);
+}
+
+void EnvTab::configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText) {
+    addAndMakeVisible(label);
+    label.setText(labelText, juce::dontSendNotification);
+    label.setJustificationType(juce::Justification::centred);
+    label.attachToComponent(&slider, false);
 }
 
 EnvTab::~EnvTab() {
@@ -104,7 +73,7 @@ void EnvTab::resized() {
 
 // EnvModule stuff
 
-EnvModule::EnvModule() {
+EnvModule::EnvModule(juce::AudioProcessorValueTreeState& apvts): ampEnvTab("AMP ENV", apvts), filterEnvTab("FILTER ENV", apvts) {
     addAndMakeVisible(tabs);
     tabs.addTab("Amplitude Env", juce::Colours::slategrey, &ampEnvTab, false);
     tabs.addTab("Filter Env", juce::Colours::slategrey.darker(), &filterEnvTab, false);
