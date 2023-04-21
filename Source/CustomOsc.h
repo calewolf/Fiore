@@ -5,7 +5,7 @@ template <typename Type>
 class CustomOscillator {
     public:
         enum Waveform {
-            sawtooth,
+            sawtooth = 0,
             square,
             sine,
             noise
@@ -39,7 +39,7 @@ class CustomOscillator {
             processorChain.prepare (spec);
         }
     
-        void changeWaveform(const int waveformId) {
+        void setWaveform(const int waveformId) {
             auto& osc = processorChain.template get<oscIndex>();
             switch (waveformId) {
                 case 0:

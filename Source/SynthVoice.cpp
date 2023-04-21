@@ -91,32 +91,9 @@ void SynthVoice::updateGain (const float gainDecibels) {
 }
 
 void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
-//    auto& oscToChange = oscNum == 1 ? osc1 : osc2;
-//    auto& oscToChange = processorChain.template get<0>();
-//
-//    switch (waveformId) {
-//        case 0:
-//            oscToChange.initialise([] (float x) { return x / juce::MathConstants<float>::pi; }, 128); // saw
-//            break;
-//        case 1:
-//            oscToChange.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128); // square
-//            break;
-//        case 2:
-//            if (oscNum == 1) {
-//                oscToChange.initialise ([](float x) { return std::sin (x); }, 128); // noise
-//            } else {
-//                oscToChange.initialise ([](float x) { return std::sin (x); }, 128); // tri
-//            }
-//            break;
-//        default:
-//            jassertfalse;
-//            break;
-//    }
+    processorChain.get<osc1Index>().setWaveform(waveformId);
 }
 
 void SynthVoice::setOscGainRatios(const float osc1Amount) {
-    jassert(osc1Amount >= 0 && osc1Amount <= 1);
-
-//    osc1Gain.setGainLinear(osc1Amount);
-//    osc2Gain.setGainLinear(1.0 - osc1Amount);
+    jassert(0 <= osc1Amount && osc1Amount <= 1);
 }
