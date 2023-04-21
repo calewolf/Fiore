@@ -1,5 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
+#include "CustomOsc.h"
 
 // TODO: What's the importance of this class?
 class SynthSound: public juce::SynthesiserSound {
@@ -25,14 +26,22 @@ class SynthVoice: public juce::SynthesiserVoice {
         /// Updates the value of `adsrParams` to change the amplitude's ADSR. Called from `pluginProcessor`.
         void updateADSR (const float attack, const float decay, const float sustain, const float release);
         void updateGain (const float gainDecibels);
+        void setOscWaveform(const int waveformId, const int oscNum);
+        void setOscGainRatios(const float osc1Amount);
+    
     private:
-        juce::ADSR adsr;
-        juce::ADSR::Parameters adsrParams;
         juce::AudioBuffer<float> synthBuffer;
     
-        juce::dsp::Oscillator<float> osc;
-        juce::dsp::Gain<float> velocityGain;
+        enum {
+            osc1Index,
+            masterGainIndex
+        };
     
-        juce::dsp::Gain<float> globalGain;
+        /// Oscillator 1: Contains a gain for its relative gain w/ osc 2
+        juce::dsp::ProcessorChain<CustomOscillator<float>, juce::dsp::Gain<float>> processorChain;
+    
+        juce::ADSR adsr;
+        juce::ADSR::Parameters adsrParams;
+    
         bool isPrepared {false};
 };

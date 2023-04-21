@@ -17,6 +17,7 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
         synth.addVoice(new SynthVoice());
     }
     synth.addSound(new SynthSound());
+    synth.setNoteStealingEnabled(true);
 }
 
 CapstoneSynthAudioProcessor::~CapstoneSynthAudioProcessor() {}
@@ -53,6 +54,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     gainRange.setSkewForCentre(-9.0);
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("GAIN", 1), "Global Gain", gainRange, 0.0));
     
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", juce::StringArray {"Saw", "Square", "Noise"}, 0));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", juce::StringArray {"Saw", "Square", "Triangle"}, 0));
+    
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
+    
     return { params.begin(), params.end() };
 }
 
@@ -72,8 +78,16 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             
             auto& gain = *apvts.getRawParameterValue("GAIN");
             
+            auto& osc1Choice = *apvts.getRawParameterValue("OSC1_WAVE");
+            auto& osc2Choice = *apvts.getRawParameterValue("OSC2_WAVE");
+            
+            auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
+            
             voice->updateADSR(attack.load(), decay.load(), sustain, release.load());
             voice->updateGain(gain.load());
+            voice->setOscWaveform(osc1Choice.load(), 1);
+            voice->setOscWaveform(osc2Choice.load(), 2);
+            voice->setOscGainRatios(osc1GainRatio.load());
         }
     }
     

@@ -1,22 +1,40 @@
 #include "SynthVoice.h"
 
 SynthVoice::SynthVoice() {
-    osc.initialise ([] (float x) { return std::sin (x); }, 128);
+    auto& masterGain = processorChain.get<masterGainIndex>();
+    masterGain.setGainLinear (0.7f);
 }
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound) {
     return dynamic_cast<juce::SynthesiserSound*>(sound) != nullptr;
 }
 
+void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels) {
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = outputChannels;
+    
+    processorChain.prepare(spec);
+    adsr.setSampleRate(sampleRate);
+    
+    isPrepared = true;
+}
+
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
-    osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
-    velocityGain.setGainLinear(velocity * 0.50); // TODO: Set a better velocity curve here?
+    std::cout << "Note on! Velocity: " << velocity << std::endl;
+    
+    auto freqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+    processorChain.get<osc1Index>().setFrequency(freqHz, true);
+    processorChain.get<osc1Index>().setLevel(velocity);
+    
     adsr.noteOn();
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
+    std::cout << "Note off!" << std::endl;
     adsr.noteOff();
-    
+
     if (!allowTailOff || !adsr.isActive()) {
         clearCurrentNote();
     }
@@ -32,70 +50,33 @@ void SynthVoice::pitchWheelMoved(int newPitchWheelValue) {
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) {
     jassert(isPrepared);
-    
-    /*
-     IMPORTANT NOTE:
-     
-     Since notes may start on *any* sample, the parent Synthesiser class may call a voice's renderNextBlock
-     in the middle of an output buffer. It doesn't necessarily align with the start of each output buffer in
-     PluginProcessor's processBlock(). So startSample really matters here (it's not always 0).
-     
-     We also need to overlap-add the result of this funciton to outputBuffer because of this issue, and the fact
-     that renderNextBlock is being called for each voice, and the input from outputBuffer can contain outputs from
-     other voices.
-     */
-    
-    // If the voice is not playing any sounds, we don't need to modify the buffer at all.
     if (!isVoiceActive()) {
         return;
     }
     
-    // Clear and resize a temp buffer to put our processed signal into
+    // 0. Clear and resize a temp buffer to put our processed signal into
     synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
     synthBuffer.clear();
-    
-    // Apply signal processing to our buffer
-    // This is a shortcut around writing everything myself (i.e. oscillators, adsr envelopes, etc.)
     juce::dsp::AudioBlock<float> audioBlock {synthBuffer};
     
-    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // fill the buffer with signals from the current osc
+    // 1. Get sounds from the oscillator processor chain
+    juce::dsp::ProcessContextReplacing<float> context (audioBlock);
+    processorChain.process(context);
     
-    velocityGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // adjust volume based on how hard the note was hit
-    
-    globalGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock)); // more gain adjustment, from the "AMP" gain knob
-    
+    // 2. Apply amplitude ADSR
     adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
     
-    // Add the current channel's audio data to the larger outputBuffer
+    // 3. Add the current channel's audio data to the larger outputBuffer
     for (int channel = 0; channel < outputBuffer.getNumChannels(); channel++) {
         outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
     }
     
-    
-    
-    // When the ADSR finishes its tail-off, we need to call this to reset the state of the note.
     if (!adsr.isActive()) {
         clearCurrentNote();
     }
 }
 
-void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels) {
-    globalGain.reset();
-    velocityGain.reset();
-    adsr.reset();
-    
-    juce::dsp::ProcessSpec spec;
-    spec.sampleRate = sampleRate;
-    spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = outputChannels;
-    
-    adsr.setSampleRate(sampleRate);
-    osc.prepare(spec);
-    globalGain.prepare(spec);
-    velocityGain.prepare(spec);
-    
-    isPrepared = true;
-}
+
 
 void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release) {
     adsrParams.attack = attack;
@@ -106,5 +87,36 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
 }
 
 void SynthVoice::updateGain (const float gainDecibels) {
-    globalGain.setGainDecibels(gainDecibels);
+//    globalGain.setGainDecibels(gainDecibels);
+}
+
+void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
+//    auto& oscToChange = oscNum == 1 ? osc1 : osc2;
+//    auto& oscToChange = processorChain.template get<0>();
+//
+//    switch (waveformId) {
+//        case 0:
+//            oscToChange.initialise([] (float x) { return x / juce::MathConstants<float>::pi; }, 128); // saw
+//            break;
+//        case 1:
+//            oscToChange.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128); // square
+//            break;
+//        case 2:
+//            if (oscNum == 1) {
+//                oscToChange.initialise ([](float x) { return std::sin (x); }, 128); // noise
+//            } else {
+//                oscToChange.initialise ([](float x) { return std::sin (x); }, 128); // tri
+//            }
+//            break;
+//        default:
+//            jassertfalse;
+//            break;
+//    }
+}
+
+void SynthVoice::setOscGainRatios(const float osc1Amount) {
+    jassert(osc1Amount >= 0 && osc1Amount <= 1);
+
+//    osc1Gain.setGainLinear(osc1Amount);
+//    osc2Gain.setGainLinear(1.0 - osc1Amount);
 }

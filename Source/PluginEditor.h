@@ -31,7 +31,7 @@ private:
     FilterModule filterModule;
     
     LFOVibratoModule lfoVibratoModule;
-    EnvModule envModule { audioProcessor.getAPVTS() };
+    EnvModule envModule;
     AmpModule ampModule;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)

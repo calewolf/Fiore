@@ -1,7 +1,7 @@
 #include <JuceHeader.h>
 #include "OscillatorModule.h"
 
-OscillatorModule::OscillatorModule() {
+OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
     // Oscillator shape combo boxes
     addAndMakeVisible(osc1ShapeMenuLabel);
     osc1ShapeMenuLabel.setText("OSC 1", juce::dontSendNotification);
@@ -9,20 +9,26 @@ OscillatorModule::OscillatorModule() {
     addAndMakeVisible(sawButton1);
     sawButton1.setRadioGroupId(RadioGroupID::Osc1);
     sawButton1.setToggleState(true, juce::dontSendNotification);
+    sawButton1.addListener(this);
     addAndMakeVisible(squareButton1);
     squareButton1.setRadioGroupId(RadioGroupID::Osc1);
+    squareButton1.addListener(this);
     addAndMakeVisible(noiseButton1);
     noiseButton1.setRadioGroupId(RadioGroupID::Osc1);
+    noiseButton1.addListener(this);
     
     addAndMakeVisible(osc2ShapeMenuLabel);
     osc2ShapeMenuLabel.setText("OSC 2", juce::dontSendNotification);
     osc2ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
     addAndMakeVisible(sawButton2);
+    sawButton2.addListener(this);
     sawButton2.setRadioGroupId(RadioGroupID::Osc2);
     sawButton2.setToggleState(true, juce::dontSendNotification);
     addAndMakeVisible(squareButton2);
+    squareButton2.addListener(this);
     squareButton2.setRadioGroupId(RadioGroupID::Osc2);
     addAndMakeVisible(triButton2);
+    triButton2.addListener(this);
     triButton2.setRadioGroupId(RadioGroupID::Osc2);
     
     // Rotary sliders
@@ -94,6 +100,8 @@ OscillatorModule::OscillatorModule() {
     oscMixSliderLabel1.setText("OSC1 Mix", juce::dontSendNotification);
     addAndMakeVisible(oscMixSliderLabel2);
     oscMixSliderLabel2.setText("OSC2 Mix", juce::dontSendNotification);
+    
+    osc1GainRatioAttachment = std::make_unique<SliderAttachment>(apvts, "OSC1_GAIN_RATIO", oscMixSlider);
     
     // Big text label
     addAndMakeVisible(oscillatorModuleLabel);
@@ -181,6 +189,18 @@ void OscillatorModule::resized() {
     parentFlexBox.performLayout(area.toFloat());
 }
 
-void OscillatorModule::comboBoxChanged(ComboBox *menu) {};
-
-void OscillatorModule::sliderValueChanged(Slider *slider) {};
+void OscillatorModule::buttonClicked(Button* button) {
+    if (button == &sawButton1) {
+        apvts.getParameterAsValue("OSC1_WAVE") = 0;
+    } else if (button == &squareButton1) {
+        apvts.getParameterAsValue("OSC1_WAVE") = 1;
+    } else if (button == &noiseButton1) {
+        apvts.getParameterAsValue("OSC1_WAVE") = 2;
+    } else if (button == &sawButton2) {
+        apvts.getParameterAsValue("OSC2_WAVE") = 0;
+    } else if (button == &squareButton2) {
+        apvts.getParameterAsValue("OSC2_WAVE") = 1;
+    } else if (button == &triButton2) {
+        apvts.getParameterAsValue("OSC2_WAVE") = 2;
+    }
+}

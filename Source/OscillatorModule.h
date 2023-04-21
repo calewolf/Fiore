@@ -2,22 +2,15 @@
 
 #include <JuceHeader.h>
 
-class OscillatorModule: public juce::Component, ComboBox::Listener, Slider::Listener {
+class OscillatorModule: public juce::Component, Button::Listener {
     public:
-        OscillatorModule();
+        OscillatorModule(juce::AudioProcessorValueTreeState& apvts);
         ~OscillatorModule() override;
         void paint(juce::Graphics&) override;
         void resized() override;
-        void comboBoxChanged(ComboBox *menu) override;
-        void sliderValueChanged(Slider* slider) override;
+        void buttonClicked(Button* button) override;
     
     private:
-        enum Waveform {
-            Sine = 1,
-            Sawtooth,
-            Square,
-            Noise
-        };
         enum RadioGroupID {
             Osc1 = 1001,
             Osc2 = 1002
@@ -38,6 +31,11 @@ class OscillatorModule: public juce::Component, ComboBox::Listener, Slider::List
         
         // A big label that says "OSCILLATOR"
         juce::Label oscillatorModuleLabel;
+    
+        juce::AudioProcessorValueTreeState& apvts;
+
+        using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+        std::unique_ptr<SliderAttachment> osc1GainRatioAttachment;
         
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscillatorModule)
 };
