@@ -26,7 +26,9 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     
     auto freqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     processorChain.get<osc1Index>().setFrequency(freqHz, true);
-    processorChain.get<osc1Index>().setLevel(velocity);
+    processorChain.get<osc1Index>().setLevel(velocity * osc1MixRatio);
+    processorChain.get<osc2Index>().setFrequency(freqHz, true);
+    processorChain.get<osc2Index>().setLevel(velocity * (1.0 - osc1MixRatio));
     
     adsr.noteOn();
 }
@@ -91,9 +93,17 @@ void SynthVoice::updateGain (const float gainDecibels) {
 }
 
 void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
-    processorChain.get<osc1Index>().setWaveform(waveformId);
+    if (oscNum == 1) {
+        std::cout << "OSC 1 waveform changed to ID " << waveformId << std::endl;
+        processorChain.get<osc1Index>().setWaveform(waveformId);
+    } else {
+        std::cout << "OSC 2 waveform changed to ID " << waveformId << std::endl;
+        processorChain.get<osc2Index>().setWaveform(waveformId);
+    }
 }
 
-void SynthVoice::setOscGainRatios(const float osc1Amount) {
-    jassert(0 <= osc1Amount && osc1Amount <= 1);
+void SynthVoice::setOscGainRatios(const float val) {
+    jassert(0 <= val && val <= 1);
+    
+    osc1MixRatio = val;
 }

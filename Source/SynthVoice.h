@@ -34,11 +34,13 @@ class SynthVoice: public juce::SynthesiserVoice {
     
         enum {
             osc1Index,
+            osc2Index,
             masterGainIndex
         };
     
-        /// Oscillator 1: Contains a gain for its relative gain w/ osc 2
-        juce::dsp::ProcessorChain<CustomOscillator<float>, juce::dsp::Gain<float>> processorChain;
+        /// Oscillators:
+        juce::dsp::ProcessorChain<CustomOscillator<float>, CustomOscillator<float>, juce::dsp::Gain<float>> processorChain;
+        float osc1MixRatio { 0.5 };
     
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;

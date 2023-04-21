@@ -84,7 +84,7 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
             
             voice->updateADSR(attack.load(), decay.load(), sustain, release.load());
-            voice->updateGain(gain.load());
+//            voice->updateGain(gain.load());
             voice->setOscWaveform(osc1Choice.load(), 1);
             voice->setOscWaveform(osc2Choice.load(), 2);
             voice->setOscGainRatios(osc1GainRatio.load());

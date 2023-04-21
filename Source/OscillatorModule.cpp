@@ -92,9 +92,9 @@ OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): a
     addAndMakeVisible(oscMixSlider);
     oscMixSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     oscMixSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-    oscMixSlider.setRange(0, 100);
-    oscMixSlider.setValue(50.0);
-    oscMixSlider.setDoubleClickReturnValue(true, 50);
+//    oscMixSlider.setRange(0, 100);
+//    oscMixSlider.setValue(50.0);
+    oscMixSlider.setDoubleClickReturnValue(true, 1.0);
     
     addAndMakeVisible(oscMixSliderLabel1);
     oscMixSliderLabel1.setText("OSC1 Mix", juce::dontSendNotification);
