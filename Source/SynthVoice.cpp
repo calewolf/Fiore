@@ -1,7 +1,6 @@
 #include "SynthVoice.h"
 
 SynthVoice::SynthVoice() {
-    auto& masterGain = processorChain.get<masterGainIndex>();
     masterGain.setGainLinear (0.7f);
 }
 
@@ -15,7 +14,9 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = outputChannels;
     
-    processorChain.prepare(spec);
+    osc1.prepare(spec);
+    osc2.prepare(spec);
+    masterGain.prepare(spec);
     adsr.setSampleRate(sampleRate);
     
     isPrepared = true;
@@ -25,10 +26,10 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     std::cout << "Note on! Velocity: " << velocity << std::endl;
     
     auto freqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    processorChain.get<osc1Index>().setFrequency(freqHz, true);
-    processorChain.get<osc1Index>().setLevel(velocity * osc1MixRatio);
-    processorChain.get<osc2Index>().setFrequency(freqHz, true);
-    processorChain.get<osc2Index>().setLevel(velocity * (1.0 - osc1MixRatio));
+    osc1.setFrequency(freqHz, true);
+    osc1.setLevel(velocity * osc1MixRatio);
+    osc2.setFrequency(freqHz, true);
+    osc2.setLevel(velocity * (1.0 - osc1MixRatio));
     
     adsr.noteOn();
 }
@@ -57,20 +58,28 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
     
     // 0. Clear and resize a temp buffer to put our processed signal into
-    synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
-    synthBuffer.clear();
-    juce::dsp::AudioBlock<float> audioBlock {synthBuffer};
+    osc1Buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    osc1Buffer.clear();
+    osc2Buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    osc2Buffer.clear();
     
-    // 1. Get sounds from the oscillator processor chain
-    juce::dsp::ProcessContextReplacing<float> context (audioBlock);
-    processorChain.process(context);
+    juce::dsp::AudioBlock<float> osc1AudioBlock {osc1Buffer};
+    juce::dsp::AudioBlock<float> osc2AudioBlock {osc2Buffer};
+    
+    // 1. Get sounds from the oscillators and add them
+    osc1.process(juce::dsp::ProcessContextReplacing<float> (osc1AudioBlock));
+    osc2.process(juce::dsp::ProcessContextReplacing<float> (osc2AudioBlock));
+    osc2AudioBlock += osc1AudioBlock;cd 
+    
+    // 2. Apply master gain
+    masterGain.process(juce::dsp::ProcessContextReplacing<float> (osc2AudioBlock));
     
     // 2. Apply amplitude ADSR
-    adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    adsr.applyEnvelopeToBuffer(osc2Buffer, 0, osc2Buffer.getNumSamples());
     
     // 3. Add the current channel's audio data to the larger outputBuffer
     for (int channel = 0; channel < outputBuffer.getNumChannels(); channel++) {
-        outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
+        outputBuffer.addFrom(channel, startSample, osc2Buffer, channel, 0, numSamples);
     }
     
     if (!adsr.isActive()) {
@@ -95,15 +104,14 @@ void SynthVoice::updateGain (const float gainDecibels) {
 void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
     if (oscNum == 1) {
         std::cout << "OSC 1 waveform changed to ID " << waveformId << std::endl;
-        processorChain.get<osc1Index>().setWaveform(waveformId);
+        osc1.setWaveform(waveformId);
     } else {
         std::cout << "OSC 2 waveform changed to ID " << waveformId << std::endl;
-        processorChain.get<osc2Index>().setWaveform(waveformId);
+        osc2.setWaveform(waveformId);
     }
 }
 
 void SynthVoice::setOscGainRatios(const float val) {
     jassert(0 <= val && val <= 1);
-    
     osc1MixRatio = val;
 }

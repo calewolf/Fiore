@@ -30,16 +30,13 @@ class SynthVoice: public juce::SynthesiserVoice {
         void setOscGainRatios(const float osc1Amount);
     
     private:
-        juce::AudioBuffer<float> synthBuffer;
-    
-        enum {
-            osc1Index,
-            osc2Index,
-            masterGainIndex
-        };
+        juce::AudioBuffer<float> osc1Buffer, osc2Buffer;
     
         /// Oscillators:
-        juce::dsp::ProcessorChain<CustomOscillator<float>, CustomOscillator<float>, juce::dsp::Gain<float>> processorChain;
+        CustomOscillator<float> osc1;
+        CustomOscillator<float> osc2;
+        juce::dsp::Gain<float> masterGain;
+    
         float osc1MixRatio { 0.5 };
     
         juce::ADSR adsr;
