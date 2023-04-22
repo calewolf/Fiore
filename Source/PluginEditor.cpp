@@ -1,7 +1,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-Editor::Editor (CapstoneSynthAudioProcessor& p): AudioProcessorEditor (&p), audioProcessor (p), oscModule(p.getAPVTS()), envModule(p.getAPVTS()), ampModule(p.getAPVTS()) {
+Editor::Editor (CapstoneSynthAudioProcessor& p):
+        AudioProcessorEditor (&p), audioProcessor (p),
+oscModule(p.getAPVTS()), filterModule(p.getAPVTS()), envModule(p.getAPVTS()), ampModule(p.getAPVTS())
+{
     addAndMakeVisible(oscModule);
     addAndMakeVisible(filterModule);
     addAndMakeVisible(ampModule);

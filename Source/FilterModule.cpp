@@ -1,78 +1,58 @@
 #include <JuceHeader.h>
 #include "FilterModule.h"
 
-FilterModule::FilterModule() {
+void FilterModule::configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate) {
+    addAndMakeVisible(slider);
+    slider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
+    slider.setDoubleClickReturnValue(true, apvts.getParameter(paramID)->getDefaultValue());
+    slider.setNumDecimalPlacesToDisplay(numDecimalPlacesToDisplay);
+    slider.setTextValueSuffix(textValueSuffix);
+    attachmentToCreate = std::make_unique<SliderAttachment>(apvts, paramID, slider);
+}
+
+void FilterModule::configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText) {
+    addAndMakeVisible(label);
+    label.setText(labelText, juce::dontSendNotification);
+    label.setJustificationType(juce::Justification::centred);
+    label.attachToComponent(&slider, false);
+}
+
+FilterModule::FilterModule(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
+    // On-off button
     addAndMakeVisible(onOffButton);
     onOffButton.setToggleable(true);
     onOffButton.setClickingTogglesState(true);
     onOffButton.addListener(this);
     onOffButton.setToggleState(true, juce::sendNotification);
     
+    // Filter type menu
     addAndMakeVisible(filterTypeMenu);
-    filterTypeMenu.setTextWhenNothingSelected("Select filter:");
-    filterTypeMenu.addItem("Lowpass", 1);
-    filterTypeMenu.addItem("Highpass", 2);
-    filterTypeMenu.addItem("Bandpass", 3);
-    filterTypeMenu.setSelectedId(1);
+    juce::StringArray filterTypeChoices { "Lowpass (12dB/Oct)", "Highpass (12dB/Oct)", "Bandpass (12dB/Oct)", "Lowpass (24dB/Oct)", "Highpass (24dB/Oct)", "Bandpass (24dB/Oct)" };
+    filterTypeMenu.addItemList(filterTypeChoices, 1);
+    filterTypeMenu.setSelectedItemIndex(0);
+    filterTypeAttachment = std::make_unique<ComboBoxAttachment>(apvts, "FILT_TYPE", filterTypeMenu);
     
     // Cutoff and resonance sliders
     addAndMakeVisible(cutoffSlider);
     cutoffSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
     cutoffSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 64, 24);
-    cutoffSlider.setRange(20.0, 10000.0);
-    cutoffSlider.setSkewFactorFromMidPoint(500.0);
-    cutoffSlider.setValue(500.0);
-    cutoffSlider.setDoubleClickReturnValue(true, 500.0);
+    cutoffSlider.setDoubleClickReturnValue(true, apvts.getParameter("FILT_CUTOFF")->getDefaultValue());
     cutoffSlider.setNumDecimalPlacesToDisplay(0);
     cutoffSlider.setTextValueSuffix("Hz");
-    
+    cutoffAttachment = std::make_unique<SliderAttachment>(apvts, "FILT_CUTOFF", cutoffSlider);
     addAndMakeVisible(cutoffSliderLabel);
     cutoffSliderLabel.setText("Cutoff", juce::dontSendNotification);
     cutoffSliderLabel.attachToComponent(&cutoffSlider, false);
     
-    addAndMakeVisible(resonanceSlider);
-    resonanceSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    resonanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    resonanceSlider.setRange(0, 100.0);
-    resonanceSlider.setSkewFactorFromMidPoint(50.0);
-    resonanceSlider.setValue(0);
-    resonanceSlider.setDoubleClickReturnValue(true, 0);
-    resonanceSlider.setNumDecimalPlacesToDisplay(0);
-    resonanceSlider.setTextValueSuffix("%");
-    
-    addAndMakeVisible(resonanceSliderLabel);
-    resonanceSliderLabel.setText("Resonance", juce::dontSendNotification);
-    resonanceSliderLabel.attachToComponent(&resonanceSlider, false);
+    configureSlider(resonanceSlider, "%", 0, "FILT_RESO", resonanceAttachment);
+    configureLabel(resonanceSlider, resonanceSliderLabel, "Resonance");
     
     // LFO and Filter Envelope knobs
-    addAndMakeVisible(lfoSlider);
-    lfoSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    lfoSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    lfoSlider.setRange(0, 100);
-    lfoSlider.setValue(0.0);
-    lfoSlider.setDoubleClickReturnValue(true, 0.0);
-    lfoSlider.setNumDecimalPlacesToDisplay(0);
-    lfoSlider.setTextValueSuffix("%");
-    
-    addAndMakeVisible(lfoSliderLabel);
-    lfoSliderLabel.setText("LFO", juce::dontSendNotification);
-    lfoSliderLabel.setJustificationType(juce::Justification::centred);
-    lfoSliderLabel.attachToComponent(&lfoSlider, false);
-    
-    addAndMakeVisible(envSlider);
-    envSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    envSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    envSlider.setRange(-100, 100);
-    envSlider.setSkewFactorFromMidPoint(0.0);
-    envSlider.setValue(0.0);
-    envSlider.setDoubleClickReturnValue(true, 0.0);
-    envSlider.setNumDecimalPlacesToDisplay(0);
-    envSlider.setTextValueSuffix("%");
-    
-    addAndMakeVisible(envSliderLabel);
-    envSliderLabel.setText("Env", juce::dontSendNotification);
-    envSliderLabel.setJustificationType(juce::Justification::centred);
-    envSliderLabel.attachToComponent(&envSlider, false);
+    configureSlider(lfoSlider, "%", 0, "FILT_LFO_AMT", lfoAttachment);
+    configureLabel(lfoSlider, lfoSliderLabel, "LFO");
+    configureSlider(envSlider, "%", 0, "FILT_ENV_AMT", envAttachment);
+    configureLabel(envSlider, envSliderLabel, "Env");
     
     // Big text label
     addAndMakeVisible(filterModuleLabel);
@@ -126,7 +106,6 @@ void FilterModule::resized() {
         juce::FlexItem(envSlider).withWidth(80).withHeight(80).withMargin(m2)
     };
     
-    
     juce::FlexBox parentFlexBox;
     parentFlexBox.flexDirection = FlexBox::Direction::column;
     parentFlexBox.justifyContent = FlexBox::JustifyContent::spaceBetween;
@@ -147,4 +126,6 @@ void FilterModule::buttonClicked(juce::Button* button) {
     resonanceSlider.setEnabled(isOn);
     lfoSlider.setEnabled(isOn);
     envSlider.setEnabled(isOn);
+    
+    apvts.getParameterAsValue("FILT_ON_OFF") = isOn;
 }

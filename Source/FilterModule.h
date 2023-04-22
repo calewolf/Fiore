@@ -4,23 +4,32 @@
 
 class FilterModule: public juce::Component, public juce::Button::Listener {
     public:
-        FilterModule();
+        FilterModule(juce::AudioProcessorValueTreeState& apvts);
         ~FilterModule() override;
         void paint (juce::Graphics&) override;
         void resized() override;
         void buttonClicked (juce::Button* button) override;
 
     private:
+        // Functions to clean up UI initialization
+        using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+        using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+        void configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText);
+        void configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate);
+    
+        // UI components
         juce::TextButton onOffButton {"On"};
         juce::ComboBox filterTypeMenu;
-    
         juce::Label cutoffSliderLabel, resonanceSliderLabel;
         juce::Slider cutoffSlider, resonanceSlider;
-        
         juce::Label lfoSliderLabel, envSliderLabel;
         juce::Slider lfoSlider, envSlider;
-        
         juce::Label filterModuleLabel;
+    
+        // Attachments to parameters
+        std::unique_ptr<SliderAttachment> cutoffAttachment, resonanceAttachment, lfoAttachment, envAttachment;
+        std::unique_ptr<ComboBoxAttachment> filterTypeAttachment;
+        juce::AudioProcessorValueTreeState& apvts;
         
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterModule)
 };
