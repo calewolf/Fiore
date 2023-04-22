@@ -1,8 +1,6 @@
 #include "SynthVoice.h"
 
-SynthVoice::SynthVoice() {
-//    masterGain.setGainDecibels(0.0);
-}
+SynthVoice::SynthVoice() {}
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound) {
     return dynamic_cast<juce::SynthesiserSound*>(sound) != nullptr;
@@ -14,17 +12,18 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = outputChannels;
     
+    // We *must* call `prepare` on each of the juce::dsp processors.
     osc1.prepare(spec);
     osc2.prepare(spec);
     masterGain.prepare(spec);
-    adsr.setSampleRate(sampleRate);
+    filter.prepare(spec);
     
+    adsr.setSampleRate(sampleRate);
     isPrepared = true;
 }
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
     std::cout << "Note on! Velocity: " << velocity << std::endl;
-    
     baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     osc1.setFrequency(baseFreqHz, true);
     osc1.setLevel(velocity * osc1MixRatio);
@@ -32,15 +31,12 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
     
     adsr.noteOn();
-    
     currentVelocity = velocity;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
     std::cout << "Note off!" << std::endl;
-    
     adsr.noteOff();
-
     if (!allowTailOff || !adsr.isActive()) {
         clearCurrentNote();
     }
@@ -73,6 +69,11 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     osc2.process(juce::dsp::ProcessContextReplacing<float> (osc2AudioBlock));
     osc2AudioBlock += osc1AudioBlock;
     
+    // Apply filter
+    if (filterIsOn) {
+        filter.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
+    }
+    
     // 2. Apply amplitude ADSR
     adsr.applyEnvelopeToBuffer(osc2Buffer, 0, osc2Buffer.getNumSamples());
     
@@ -89,17 +90,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
 }
 
-void SynthVoice::setAmpADSR(float attack, float decay, float sustain, float release){
-    adsrParams.attack = attack;
-    adsrParams.decay = decay;
-    adsrParams.sustain = sustain;
-    adsrParams.release = release;
-    adsr.setParameters(adsrParams);
-}
-
-void SynthVoice::setMasterGain(float gainDecibels) {
-    masterGain.setGainDecibels(gainDecibels);
-}
+// OSC Module Setters
 
 void SynthVoice::setOscWaveform(int waveformId, int oscNum) {
     if (oscNum == 1) {
@@ -116,43 +107,90 @@ void SynthVoice::setOscGainRatios(float val) {
     osc2.setLevel(currentVelocity * (1.0 - osc1MixRatio));
 }
 
-void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) { 
-    return;
-}
-
 void SynthVoice::setOscDetune(int semitones, int cents) {
     detuneSemitones = semitones + ((float) cents / 100.0);
     osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
 }
 
-void SynthVoice::setOscVibratoDepth(float semitones) { 
+void SynthVoice::setOscVibratoDepth(float semitones) {
+    // TODO: Implement
     return;
 }
 
-void SynthVoice::setOscSineLevel(float percent) { 
+void SynthVoice::setOscSineLevel(float percent) {
+    // TODO: Implement
     return;
 }
 
-void SynthVoice::setFilterType(int filterTypeId) { 
+// Filter Module Setters
+
+void SynthVoice::setFilterType(int filterTypeIdx) {
+    dsp::LadderFilterMode modeToAssign;
+    switch (filterTypeIdx) {
+        case 0:
+            modeToAssign = dsp::LadderFilterMode::LPF12;
+            break;
+        case 1:
+            modeToAssign = dsp::LadderFilterMode::HPF12;
+            break;
+        case 2:
+            modeToAssign = dsp::LadderFilterMode::BPF12;
+            break;
+        case 3:
+            modeToAssign = dsp::LadderFilterMode::LPF24;
+            break;
+        case 4:
+            modeToAssign = dsp::LadderFilterMode::HPF24;
+            break;
+        case 5:
+            modeToAssign = dsp::LadderFilterMode::BPF24;
+            break;
+        default:
+            jassertfalse;
+            break;
+    }
+    filter.setMode(modeToAssign);
+}
+
+void SynthVoice::setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt) {
+    filter.setCutoffFrequencyHz(cutoffHz);
+    filter.setResonance(resonance);
+    // TODO: Implement LFO/ENV
+}
+
+void SynthVoice::setFilterOnOff(bool filterShouldBeOn) {
+    filterIsOn = filterShouldBeOn;
+}
+
+// Amp Module Setters
+
+void SynthVoice::setMasterGain(float gainDecibels) {
+    masterGain.setGainDecibels(gainDecibels);
+}
+
+// Vibrato / LFO Module Setters
+
+void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) {
+    // TODO: Implement
     return;
 }
 
-void SynthVoice::setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt) { 
+void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz) {
+    // TODO: Implement
     return;
 }
 
-void SynthVoice::setFilterOnOff(bool filterShouldBeOn) { 
-    return;
+// Envelope Module Setters
+
+void SynthVoice::setAmpADSR(float attack, float decay, float sustain, float release){
+    adsrParams.attack = attack;
+    adsrParams.decay = decay;
+    adsrParams.sustain = sustain;
+    adsrParams.release = release;
+    adsr.setParameters(adsrParams);
 }
 
-void SynthVoice::setFilterADSR(float attack, float decay, float sustain, float release) { 
+void SynthVoice::setFilterADSR(float attack, float decay, float sustain, float release) {
+    // TODO: Implement
     return;
 }
-
-
-
-
-
-
-
-

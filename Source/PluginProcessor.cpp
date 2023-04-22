@@ -104,12 +104,12 @@ void CapstoneSynthAudioProcessor::updateParams() {
             // Filter Module Params
             auto& filtType = *apvts.getRawParameterValue("FILT_TYPE");
             auto& filtCutoff = *apvts.getRawParameterValue("FILT_CUTOFF");
-            auto& filtReso = *apvts.getRawParameterValue("FILT_RESO");
-            auto& filtLfoAmt = *apvts.getRawParameterValue("FILT_LFO_AMT");
-            auto& filtEnvAmt = *apvts.getRawParameterValue("FILT_ENV_AMT");
-            auto& filtOn = *apvts.getRawParameterValue("FILT_ON_OFF");
+            double filtReso = *apvts.getRawParameterValue("FILT_RESO") / 100.0;
+            double filtLfoAmt = *apvts.getRawParameterValue("FILT_LFO_AMT") / 100.0;
+            double filtEnvAmt = *apvts.getRawParameterValue("FILT_ENV_AMT") / 100.0;
+            bool filtOn = *apvts.getRawParameterValue("FILT_ON_OFF");
             voice->setFilterType(filtType.load());
-            voice->setFilterParams(filtCutoff.load(), filtReso.load(), filtLfoAmt.load(), filtEnvAmt.load());
+            voice->setFilterParams(filtCutoff.load(), filtReso, filtLfoAmt, filtEnvAmt);
             voice->setFilterOnOff(filtOn);
             
             // Amp Module Params
