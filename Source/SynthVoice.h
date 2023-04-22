@@ -26,7 +26,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         // Functions to change synth parameters
         void setOscWaveform(int waveformId, int oscNum);
         void setOscGainRatios(float osc1Amount);
-        void setOscDetune(float semitones, float cents);
+        void setOscDetune(int semitones, int cents);
         void setOscVibratoDepth(float semitones);
         void setOscSineLevel(float percent);
         void setFilterType(int filterTypeId);
@@ -48,6 +48,13 @@ class SynthVoice: public juce::SynthesiserVoice {
     
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;
+    
+        /// The velocity from the last time `startNote` was called.
+        float currentVelocity;
+    
+        /// The amount of semitones to detune Oscillator 2 by.
+        float detuneSemitones;
+        float baseFreqHz;
     
         bool isPrepared {false};
 };

@@ -25,13 +25,15 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
     std::cout << "Note on! Velocity: " << velocity << std::endl;
     
-    auto freqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    osc1.setFrequency(freqHz, true);
+    baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+    osc1.setFrequency(baseFreqHz, true);
     osc1.setLevel(velocity * osc1MixRatio);
-    osc2.setFrequency(freqHz, true);
+    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
     
     adsr.noteOn();
+    
+    currentVelocity = velocity;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
@@ -110,14 +112,17 @@ void SynthVoice::setOscWaveform(int waveformId, int oscNum) {
 void SynthVoice::setOscGainRatios(float val) {
     jassert(0 <= val && val <= 1);
     osc1MixRatio = val;
+    osc1.setLevel(currentVelocity * osc1MixRatio);
+    osc2.setLevel(currentVelocity * (1.0 - osc1MixRatio));
 }
 
 void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) { 
     return;
 }
 
-void SynthVoice::setOscDetune(float semitones, float cents) { 
-    return;
+void SynthVoice::setOscDetune(int semitones, int cents) {
+    detuneSemitones = semitones + ((float) cents / 100.0);
+    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
 }
 
 void SynthVoice::setOscVibratoDepth(float semitones) { 
