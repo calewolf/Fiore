@@ -1,106 +1,68 @@
 #include <JuceHeader.h>
 #include "OscillatorModule.h"
 
+void OscillatorModule::configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText) {
+    addAndMakeVisible(label);
+    label.setText(labelText, juce::dontSendNotification);
+    label.setJustificationType(juce::Justification::centred);
+    label.attachToComponent(&slider, false);
+}
+
+void OscillatorModule::configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate) {
+    addAndMakeVisible(slider);
+    slider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
+    slider.setTextValueSuffix(textValueSuffix);
+    slider.setNumDecimalPlacesToDisplay(numDecimalPlacesToDisplay);
+    slider.setDoubleClickReturnValue(true, apvts.getParameter(paramID)->getDefaultValue());
+    attachmentToCreate = std::make_unique<SliderAttachment>(apvts, paramID, slider);
+}
+
+void OscillatorModule::configureRadioButton(juce::ToggleButton& button, RadioGroupID group, bool isOn) {
+    addAndMakeVisible(button);
+    button.setRadioGroupId(group);
+    button.addListener(this);
+    button.setToggleState(isOn, juce::dontSendNotification);
+}
+
 OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
-    // Oscillator shape combo boxes
+    // Oscillator shape radio buttons (and labels)
     addAndMakeVisible(osc1ShapeMenuLabel);
     osc1ShapeMenuLabel.setText("OSC 1", juce::dontSendNotification);
     osc1ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
-    addAndMakeVisible(sawButton1);
-    sawButton1.setRadioGroupId(RadioGroupID::Osc1);
-    sawButton1.setToggleState(true, juce::dontSendNotification);
-    sawButton1.addListener(this);
-    addAndMakeVisible(squareButton1);
-    squareButton1.setRadioGroupId(RadioGroupID::Osc1);
-    squareButton1.addListener(this);
-    addAndMakeVisible(noiseButton1);
-    noiseButton1.setRadioGroupId(RadioGroupID::Osc1);
-    noiseButton1.addListener(this);
-    
     addAndMakeVisible(osc2ShapeMenuLabel);
     osc2ShapeMenuLabel.setText("OSC 2", juce::dontSendNotification);
     osc2ShapeMenuLabel.setFont(juce::Font (16.0f, juce::Font::bold));
-    addAndMakeVisible(sawButton2);
-    sawButton2.addListener(this);
-    sawButton2.setRadioGroupId(RadioGroupID::Osc2);
-    sawButton2.setToggleState(true, juce::dontSendNotification);
-    addAndMakeVisible(squareButton2);
-    squareButton2.addListener(this);
-    squareButton2.setRadioGroupId(RadioGroupID::Osc2);
-    addAndMakeVisible(triButton2);
-    triButton2.addListener(this);
-    triButton2.setRadioGroupId(RadioGroupID::Osc2);
+    
+    configureRadioButton(sawButton1, RadioGroupID::Osc1, true);
+    configureRadioButton(squareButton1, RadioGroupID::Osc1);
+    configureRadioButton(noiseButton1, RadioGroupID::Osc1);
+    configureRadioButton(sawButton2, RadioGroupID::Osc2, true);
+    configureRadioButton(squareButton2, RadioGroupID::Osc2);
+    configureRadioButton(triButton2, RadioGroupID::Osc2);
     
     // Rotary sliders
-    addAndMakeVisible(sineLevelSlider);
-    sineLevelSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    sineLevelSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    sineLevelSlider.setRange(0, 100);
-    sineLevelSlider.setDoubleClickReturnValue(true, 0);
-    sineLevelSlider.setTextValueSuffix("%");
-    sineLevelSlider.setValue(0);
-    sineLevelSlider.setNumDecimalPlacesToDisplay(0);
+    configureSlider(sineLevelSlider, "%", 0, "SINE_LVL", sineLevelAttachment);
+    configureLabel(sineLevelSlider, sineLevelSliderLabel, "Sine Level");
     
-    addAndMakeVisible(sineLevelSliderLabel);
-    sineLevelSliderLabel.setText("Sine Level", juce::dontSendNotification);
-    sineLevelSliderLabel.setJustificationType(juce::Justification::centred);
-    sineLevelSliderLabel.attachToComponent(&sineLevelSlider, false);
+    configureSlider(vibratoSlider, " st", 1, "VIBRATO", vibratoAttachment);
+    configureLabel(vibratoSlider, vibratoSliderLabel, "Vibrato");
     
-    addAndMakeVisible(vibratoSlider);
-    vibratoSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    vibratoSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    vibratoSlider.setRange(0.0, 36.0);
-    vibratoSlider.setTextValueSuffix(" st");
-    vibratoSlider.setValue(0.0);
-    vibratoSlider.setDoubleClickReturnValue(true, 0.0);
-    vibratoSlider.setNumDecimalPlacesToDisplay(1);
+    configureSlider(semitonesSlider, " st", 0, "DETUNE_SEMI", detuneSemiAttachment);
+    configureLabel(semitonesSlider, semitonesSliderLabel, "Semitones");
     
-    addAndMakeVisible(vibratoSliderLabel);
-    vibratoSliderLabel.setText("Vibrato", juce::dontSendNotification);
-    vibratoSliderLabel.setJustificationType(juce::Justification::centred);
-    vibratoSliderLabel.attachToComponent(&vibratoSlider, false);
-    
-    addAndMakeVisible(semitonesSlider);
-    semitonesSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    semitonesSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    semitonesSlider.setRange(-24.0, 24.0);
-    semitonesSlider.setTextValueSuffix(" st");
-    semitonesSlider.setValue(0.0);
-    semitonesSlider.setDoubleClickReturnValue(true, 0);
-    semitonesSlider.setNumDecimalPlacesToDisplay(0);
-    
-    addAndMakeVisible(semitonesSliderLabel);
-    semitonesSliderLabel.setText("Semitones", juce::dontSendNotification);
-    semitonesSliderLabel.setJustificationType(juce::Justification::centred);
-    semitonesSliderLabel.attachToComponent(&semitonesSlider, false);
-    
-    addAndMakeVisible(centsSlider);
-    centsSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    centsSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 64, 24);
-    centsSlider.setRange(-50.0, 50.0);
-    centsSlider.setTextValueSuffix(" c");
-    centsSlider.setValue(0.0);
-    centsSlider.setDoubleClickReturnValue(true, 0);
-    centsSlider.setNumDecimalPlacesToDisplay(0);
-    
-    addAndMakeVisible(centsSliderLabel);
-    centsSliderLabel.setText("Cents", juce::dontSendNotification);
-    centsSliderLabel.setJustificationType(juce::Justification::centred);
-    centsSliderLabel.attachToComponent(&centsSlider, false);
+    configureSlider(centsSlider, " c", 0, "DETUNE_CENTS", detuneCentsAttachment);
+    configureLabel(centsSlider, centsSliderLabel, "Cents");
     
     // Osc mix slider
     addAndMakeVisible(oscMixSlider);
     oscMixSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     oscMixSlider.setSliderStyle(Slider::SliderStyle::LinearVertical);
-//    oscMixSlider.setRange(0, 100);
-//    oscMixSlider.setValue(50.0);
     oscMixSlider.setDoubleClickReturnValue(true, 1.0);
-    
     addAndMakeVisible(oscMixSliderLabel1);
     oscMixSliderLabel1.setText("OSC1 Mix", juce::dontSendNotification);
     addAndMakeVisible(oscMixSliderLabel2);
     oscMixSliderLabel2.setText("OSC2 Mix", juce::dontSendNotification);
-    
     osc1GainRatioAttachment = std::make_unique<SliderAttachment>(apvts, "OSC1_GAIN_RATIO", oscMixSlider);
     
     // Big text label

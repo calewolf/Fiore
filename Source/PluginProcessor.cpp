@@ -35,31 +35,101 @@ void CapstoneSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor::createParams() {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
     
-    juce::NormalisableRange<float> attackRange {0.0001, 10.0, 0.0001}; // sec
-    attackRange.setSkewForCentre(0.41);
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_ATK", 1), "Amp Attack", attackRange, 0.0004));
+    // Oscillator Module Params
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", juce::StringArray {"Saw", "Square", "Noise"}, 0));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", juce::StringArray {"Saw", "Square", "Triangle"}, 0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("DETUNE_CENTS", 1), "Osc. 2 Detune (Cents)", -50.0, 50.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("DETUNE_SEMI", 1), "Osc. 2 Detune (Semitones)", -24.0, 24.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("VIBRATO", 1), "Vibrato Depth", 0.0, 36.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("SINE_LVL", 1), "Sine Osc. Level", 0.0, 1.0, 0.0));
     
-    juce::NormalisableRange<float> decayRange {0.0001, 10.0, 0.0001}; // sec
-    decayRange.setSkewForCentre(0.41);
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_DEC", 1), "Amp Decay", decayRange, 0.520));
+    // Filter Module Params
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("FILT_TYPE", 1), "Filter Type", juce::StringArray {"Lowpass", "Highpass", "Bandpass"}, 0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_CUTOFF", 1), "Cutoff", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_RESO", 1), "Resonance", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_LFO_AMT", 1), "Filter LFO Amount", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_ENV_AMT", 1), "Filter Envelope Amount", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterBool>(ParameterID("FILT_ON_OFF", 1), "Filter On/Off", true));
     
-    juce::NormalisableRange<float> sustainRange {1, 100, 1}; // %
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_SUS", 1), "Amp Sustain", sustainRange, 75));
-    
-    juce::NormalisableRange<float> releaseRange {0.001, 10.0, 0.001}; // sec
-    releaseRange.setSkewForCentre(0.5);
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_REL", 1), "Amp Release", releaseRange, 0.038));
-    
+    // Amp Module Params
     juce::NormalisableRange<float> gainRange {-84.0, 12.0, 0.1};
     gainRange.setSkewForCentre(-9.0);
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("GAIN", 1), "Global Gain", gainRange, 0.0));
     
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", juce::StringArray {"Saw", "Square", "Noise"}, 0));
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", juce::StringArray {"Saw", "Square", "Triangle"}, 0));
+    // LFO/Vibrato Module Params
+    // TODO: LFO shape, LFO percent, LFO hz, Vibrato shape, Vibrato pct, Vib hz
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
+    // ADSR Module Params
+    juce::NormalisableRange<float> attackRange {0.0001, 10.0, 0.0001}; // sec
+    juce::NormalisableRange<float> decayRange {0.0001, 10.0, 0.0001}; // sec
+    juce::NormalisableRange<float> sustainRange {1, 100, 1}; // %
+    juce::NormalisableRange<float> releaseRange {0.001, 10.0, 0.001}; // sec
+    attackRange.setSkewForCentre(0.41);
+    decayRange.setSkewForCentre(0.41);
+    releaseRange.setSkewForCentre(0.5);
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_ATK", 1), "Amp Attack", attackRange, 0.0004));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_DEC", 1), "Amp Decay", decayRange, 0.520));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_SUS", 1), "Amp Sustain", sustainRange, 75));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("AMP_REL", 1), "Amp Release", releaseRange, 0.038));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_ATK", 1), "Filter Attack", attackRange, 0.0004));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_DEC", 1), "Filter Decay", decayRange, 0.520));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_SUS", 1), "Filter Sustain", sustainRange, 75));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_REL", 1), "Filter Release", releaseRange, 0.038));
     
     return { params.begin(), params.end() };
+}
+
+void CapstoneSynthAudioProcessor::updateParams() {
+    for (int i = 0; i < synth.getNumVoices(); i++) {
+        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i))) {
+            
+            // Oscillator Module Params
+            auto& osc1Choice = *apvts.getRawParameterValue("OSC1_WAVE");
+            auto& osc2Choice = *apvts.getRawParameterValue("OSC2_WAVE");
+            auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
+            auto& osc2DetuneCents = *apvts.getRawParameterValue("DETUNE_CENTS");
+            auto& osc2DetuneSemi = *apvts.getRawParameterValue("DETUNE_SEMI");
+            auto& vibratoDepth = *apvts.getRawParameterValue("VIBRATO");
+            auto& sineLevel = *apvts.getRawParameterValue("SINE_LVL");
+            voice->setOscWaveform(osc1Choice.load(), 1);
+            voice->setOscWaveform(osc2Choice.load(), 2);
+            voice->setOscGainRatios(osc1GainRatio.load());
+            voice->setOscDetune(osc2DetuneSemi.load(), osc2DetuneCents.load());
+            voice->setOscVibratoDepth(vibratoDepth.load());
+            voice->setOscSineLevel(sineLevel.load());
+            
+            // Filter Module Params
+            auto& filtType = *apvts.getRawParameterValue("FILT_TYPE");
+            auto& filtCutoff = *apvts.getRawParameterValue("FILT_CUTOFF");
+            auto& filtReso = *apvts.getRawParameterValue("FILT_RESO");
+            auto& filtLfoAmt = *apvts.getRawParameterValue("FILT_LFO_AMT");
+            auto& filtEnvAmt = *apvts.getRawParameterValue("FILT_ENV_AMT");
+            auto& filtOn = *apvts.getRawParameterValue("FILT_ON_OFF");
+            voice->setFilterType(filtType.load());
+            voice->setFilterParams(filtCutoff.load(), filtReso.load(), filtLfoAmt.load(), filtEnvAmt.load());
+            voice->setFilterOnOff(filtOn);
+            
+            // Amp Module Params
+            auto& gain = *apvts.getRawParameterValue("GAIN");
+            voice->setMasterGain(gain.load());
+            
+            // LFO/Vibrato Module Params
+            // TODO: Add in LFO/Vibrato module params
+            
+            // ADSR Module Params
+            auto& ampAtk = *apvts.getRawParameterValue("AMP_ATK");
+            auto& ampDecay = *apvts.getRawParameterValue("AMP_DEC");
+            double ampSus = (*apvts.getRawParameterValue("AMP_SUS")) / 100.0;
+            auto& ampRel = *apvts.getRawParameterValue("AMP_REL");
+            auto& filtAtk = *apvts.getRawParameterValue("FILT_ATK");
+            auto& filtDecay = *apvts.getRawParameterValue("FILT_DEC");
+            double filtSus = (*apvts.getRawParameterValue("FILT_SUS")) / 100.0;
+            auto& filtRel = *apvts.getRawParameterValue("FILT_REL");
+            voice->setAmpADSR(ampAtk.load(), ampDecay.load(), ampSus, ampRel.load());
+            voice->setFilterADSR(filtAtk.load(), filtDecay.load(), filtSus, filtRel.load());
+        }
+    }
 }
 
 void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
@@ -69,27 +139,8 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     }
     
     // Update each voice with current values from our parameters
-    for (int i = 0; i < synth.getNumVoices(); i++) {
-        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i))) {
-            auto& attack = *apvts.getRawParameterValue("AMP_ATK");
-            auto& decay = *apvts.getRawParameterValue("AMP_DEC");
-            double sustain = (*apvts.getRawParameterValue("AMP_SUS")) / 100.0;
-            auto& release = *apvts.getRawParameterValue("AMP_REL");
-            
-            auto& gain = *apvts.getRawParameterValue("GAIN");
-            
-            auto& osc1Choice = *apvts.getRawParameterValue("OSC1_WAVE");
-            auto& osc2Choice = *apvts.getRawParameterValue("OSC2_WAVE");
-            
-            auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
-            
-            voice->updateADSR(attack.load(), decay.load(), sustain, release.load());
-            voice->updateGain(gain.load());
-            voice->setOscWaveform(osc1Choice.load(), 1);
-            voice->setOscWaveform(osc2Choice.load(), 2);
-            voice->setOscGainRatios(osc1GainRatio.load());
-        }
-    }
+    // TODO: Figure out a way to save memory by only calling updates when needed!
+    updateParams();
     
     // Get audio from the synth. Will call renderNextBlock for all the synth voices
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
@@ -183,7 +234,7 @@ bool CapstoneSynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 #endif
 
 bool CapstoneSynthAudioProcessor::hasEditor() const {
-    return true; // (change this to false if you choose to not supply an editor)
+    return true;
 }
 
 juce::AudioProcessorEditor* CapstoneSynthAudioProcessor::createEditor() {

@@ -87,7 +87,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
 }
 
-void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release) {
+void SynthVoice::setAmpADSR(float attack, float decay, float sustain, float release){
     adsrParams.attack = attack;
     adsrParams.decay = decay;
     adsrParams.sustain = sustain;
@@ -95,11 +95,11 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
     adsr.setParameters(adsrParams);
 }
 
-void SynthVoice::updateGain (const float gainDecibels) {
+void SynthVoice::setMasterGain(float gainDecibels) {
     masterGain.setGainDecibels(gainDecibels);
 }
 
-void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
+void SynthVoice::setOscWaveform(int waveformId, int oscNum) {
     if (oscNum == 1) {
         osc1.setWaveform(waveformId);
     } else {
@@ -107,7 +107,47 @@ void SynthVoice::setOscWaveform(const int waveformId, const int oscNum) {
     }
 }
 
-void SynthVoice::setOscGainRatios(const float val) {
+void SynthVoice::setOscGainRatios(float val) {
     jassert(0 <= val && val <= 1);
     osc1MixRatio = val;
 }
+
+void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) { 
+    return;
+}
+
+void SynthVoice::setOscDetune(float semitones, float cents) { 
+    return;
+}
+
+void SynthVoice::setOscVibratoDepth(float semitones) { 
+    return;
+}
+
+void SynthVoice::setOscSineLevel(float percent) { 
+    return;
+}
+
+void SynthVoice::setFilterType(int filterTypeId) { 
+    return;
+}
+
+void SynthVoice::setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt) { 
+    return;
+}
+
+void SynthVoice::setFilterOnOff(bool filterShouldBeOn) { 
+    return;
+}
+
+void SynthVoice::setFilterADSR(float attack, float decay, float sustain, float release) { 
+    return;
+}
+
+
+
+
+
+
+
+

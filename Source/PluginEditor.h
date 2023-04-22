@@ -27,9 +27,9 @@ public:
 
 private:
     CapstoneSynthAudioProcessor& audioProcessor;
+    
     OscillatorModule oscModule;
     FilterModule filterModule;
-    
     LFOVibratoModule lfoVibratoModule;
     EnvModule envModule;
     AmpModule ampModule;

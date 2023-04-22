@@ -16,6 +16,12 @@ class OscillatorModule: public juce::Component, Button::Listener {
             Osc2 = 1002
         };
     
+        // Functions for cleaning up initialization code
+        using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+        void configureRadioButton(juce::ToggleButton& button, RadioGroupID group, bool isOn = false);
+        void configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText);
+        void configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate);
+    
         // Radio buttons for choosing which waveforms to play
         juce::Label osc1ShapeMenuLabel, osc2ShapeMenuLabel;
         juce::ToggleButton sawButton1 {"Saw"}, squareButton1 {"Square"}, noiseButton1 {"Noise"};
@@ -32,10 +38,9 @@ class OscillatorModule: public juce::Component, Button::Listener {
         // A big label that says "OSCILLATOR"
         juce::Label oscillatorModuleLabel;
     
+        // Stuff for attaching sliders to parameters
         juce::AudioProcessorValueTreeState& apvts;
-
-        using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-        std::unique_ptr<SliderAttachment> osc1GainRatioAttachment;
+        std::unique_ptr<SliderAttachment> osc1GainRatioAttachment, detuneCentsAttachment, detuneSemiAttachment, vibratoAttachment, sineLevelAttachment;
         
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscillatorModule)
 };

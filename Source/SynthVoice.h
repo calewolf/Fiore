@@ -2,7 +2,6 @@
 #include <JuceHeader.h>
 #include "CustomOsc.h"
 
-// TODO: What's the importance of this class?
 class SynthSound: public juce::SynthesiserSound {
     public:
         SynthSound() {}
@@ -21,22 +20,30 @@ class SynthVoice: public juce::SynthesiserVoice {
         void pitchWheelMoved (int newPitchWheelValue) override;
         void renderNextBlock (juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
         
+        // Sets up voice for playback
         void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
     
-        /// Updates the value of `adsrParams` to change the amplitude's ADSR. Called from `pluginProcessor`.
-        void updateADSR (const float attack, const float decay, const float sustain, const float release);
-        void updateGain (const float gainDecibels);
-        void setOscWaveform(const int waveformId, const int oscNum);
-        void setOscGainRatios(const float osc1Amount);
-    
+        // Functions to change synth parameters
+        void setOscWaveform(int waveformId, int oscNum);
+        void setOscGainRatios(float osc1Amount);
+        void setOscDetune(float semitones, float cents);
+        void setOscVibratoDepth(float semitones);
+        void setOscSineLevel(float percent);
+        void setFilterType(int filterTypeId);
+        void setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt);
+        void setFilterOnOff(bool filterShouldBeOn);
+        void setMasterGain(float decibels);
+        void setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz);
+        void setVibratoParams(int lfoShapeId, float ampPercent, float rateHz);
+        void setAmpADSR(float attack, float decay, float sustain, float release);
+        void setFilterADSR(float attack, float decay, float sustain, float release);
+        
     private:
         juce::AudioBuffer<float> osc1Buffer, osc2Buffer;
     
-        /// Oscillators:
-        CustomOscillator<float> osc1;
-        CustomOscillator<float> osc2;
+        // DSP Components:
+        CustomOscillator<float> osc1, osc2;
         juce::dsp::Gain<float> masterGain;
-    
         float osc1MixRatio { 0.5 };
     
         juce::ADSR adsr;
