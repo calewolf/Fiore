@@ -49,8 +49,8 @@ FilterModule::FilterModule(juce::AudioProcessorValueTreeState& apvts): apvts(apv
     configureLabel(resonanceSlider, resonanceSliderLabel, "Resonance");
     
     // LFO and Filter Envelope knobs
-    configureSlider(lfoSlider, "%", 0, "FILT_LFO_AMT", lfoAttachment);
-    configureLabel(lfoSlider, lfoSliderLabel, "LFO");
+    configureSlider(driveSlider, "%", 0, "FILT_DRIVE_AMT", driveAttachment);
+    configureLabel(driveSlider, driveSliderLabel, "Drive");
     configureSlider(envSlider, "%", 0, "FILT_ENV_AMT", envAttachment);
     configureLabel(envSlider, envSliderLabel, "Env");
     
@@ -102,7 +102,7 @@ void FilterModule::resized() {
     juce::FlexItem::Margin m2 (24, 0, 0, 0);
     row3.items = {
         juce::FlexItem(resonanceSlider).withWidth(80).withHeight(80).withMargin(m2),
-        juce::FlexItem(lfoSlider).withWidth(80).withHeight(80).withMargin(m2),
+        juce::FlexItem(driveSlider).withWidth(80).withHeight(80).withMargin(m2),
         juce::FlexItem(envSlider).withWidth(80).withHeight(80).withMargin(m2)
     };
     
@@ -124,7 +124,7 @@ void FilterModule::buttonClicked(juce::Button* button) {
     filterTypeMenu.setEnabled(isOn);
     cutoffSlider.setEnabled(isOn);
     resonanceSlider.setEnabled(isOn);
-    lfoSlider.setEnabled(isOn);
+    driveSlider.setEnabled(isOn);
     envSlider.setEnabled(isOn);
     
     apvts.getParameterAsValue("FILT_ON_OFF") = isOn;

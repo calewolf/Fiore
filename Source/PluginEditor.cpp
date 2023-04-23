@@ -3,7 +3,7 @@
 
 Editor::Editor (CapstoneSynthAudioProcessor& p):
         AudioProcessorEditor (&p), audioProcessor (p),
-oscModule(p.getAPVTS()), filterModule(p.getAPVTS()), envModule(p.getAPVTS()), ampModule(p.getAPVTS())
+oscModule(p.getAPVTS()), filterModule(p.getAPVTS()), lfoVibratoModule(p.getAPVTS()), envModule(p.getAPVTS()), ampModule(p.getAPVTS())
 {
     addAndMakeVisible(oscModule);
     addAndMakeVisible(filterModule);

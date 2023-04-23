@@ -22,12 +22,12 @@ class FilterModule: public juce::Component, public juce::Button::Listener {
         juce::ComboBox filterTypeMenu;
         juce::Label cutoffSliderLabel, resonanceSliderLabel;
         juce::Slider cutoffSlider, resonanceSlider;
-        juce::Label lfoSliderLabel, envSliderLabel;
-        juce::Slider lfoSlider, envSlider;
+        juce::Label driveSliderLabel, envSliderLabel;
+        juce::Slider driveSlider, envSlider;
         juce::Label filterModuleLabel;
     
         // Attachments to parameters
-        std::unique_ptr<SliderAttachment> cutoffAttachment, resonanceAttachment, lfoAttachment, envAttachment;
+        std::unique_ptr<SliderAttachment> cutoffAttachment, resonanceAttachment, driveAttachment, envAttachment;
         std::unique_ptr<ComboBoxAttachment> filterTypeAttachment;
         juce::AudioProcessorValueTreeState& apvts;
         

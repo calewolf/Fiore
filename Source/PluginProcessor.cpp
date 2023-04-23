@@ -50,7 +50,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     cutoffRange.setSkewForCentre(500.0);
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_CUTOFF", 1), "Cutoff", cutoffRange, 500.0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_RESO", 1), "Resonance", 0, 100, 0));
-    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_LFO_AMT", 1), "Filter LFO Amount", 0, 100, 0));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_DRIVE_AMT", 1), "Filter Drive Amount", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_ENV_AMT", 1), "Filter Envelope Amount", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterBool>(ParameterID("FILT_ON_OFF", 1), "Filter On/Off", true));
     
@@ -60,7 +60,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("GAIN", 1), "Global Gain", gainRange, 0.0));
     
     // LFO/Vibrato Module Params
-    // TODO: LFO shape, LFO percent, LFO hz, Vibrato shape, Vibrato pct, Vib hz
+    juce::NormalisableRange<float> rateRange {-0.01, 200.0, 0.01};
+    rateRange.setSkewForCentre(15.0);
+    juce::StringArray lfoShapeOptions { "Saw Up", "Saw Down", "Tri", "Square", "Noise" };
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("LFO_SHAPE", 1), "Filter LFO Shape", lfoShapeOptions, 2));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("LFO_AMOUNT", 1), "Filter LFO Amount", 0, 100, 25));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("LFO_RATE", 1), "Filter LFO Rate", rateRange, 1.0));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("VIB_SHAPE", 1), "Vibrato Shape", lfoShapeOptions, 2));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("VIB_AMOUNT", 1), "Vibrato Amount", 0, 100, 0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("VIB_RATE", 1), "Vibrato Rate", rateRange, 1.0));
     
     // ADSR Module Params
     juce::NormalisableRange<float> attackRange {0.0001, 10.0, 0.0001}; // sec
@@ -105,11 +113,11 @@ void CapstoneSynthAudioProcessor::updateParams() {
             auto& filtType = *apvts.getRawParameterValue("FILT_TYPE");
             auto& filtCutoff = *apvts.getRawParameterValue("FILT_CUTOFF");
             double filtReso = *apvts.getRawParameterValue("FILT_RESO") / 100.0;
-            double filtLfoAmt = *apvts.getRawParameterValue("FILT_LFO_AMT") / 100.0;
+            double filtDriveAmt = *apvts.getRawParameterValue("FILT_DRIVE_AMT") / 100.0;
             double filtEnvAmt = *apvts.getRawParameterValue("FILT_ENV_AMT") / 100.0;
             bool filtOn = *apvts.getRawParameterValue("FILT_ON_OFF");
             voice->setFilterType(filtType.load());
-            voice->setFilterParams(filtCutoff.load(), filtReso, filtLfoAmt, filtEnvAmt);
+            voice->setFilterParams(filtCutoff.load(), filtReso, filtDriveAmt, filtEnvAmt);
             voice->setFilterOnOff(filtOn);
             
             // Amp Module Params
@@ -117,7 +125,14 @@ void CapstoneSynthAudioProcessor::updateParams() {
             voice->setMasterGain(gain.load());
             
             // LFO/Vibrato Module Params
-            // TODO: Add in LFO/Vibrato module params
+            auto& lfoShape = *apvts.getRawParameterValue("LFO_SHAPE");
+            double lfoAmount = *apvts.getRawParameterValue("LFO_AMOUNT") / 100.0;
+            auto& lfoRate = *apvts.getRawParameterValue("LFO_RATE");
+            auto& vibratoShape = *apvts.getRawParameterValue("VIB_SHAPE");
+            double vibratoAmount = *apvts.getRawParameterValue("VIB_AMOUNT") / 100.0;
+            auto& vibratoRate = *apvts.getRawParameterValue("VIB_RATE");
+            voice->setFilterLFOParams(lfoShape, lfoAmount, lfoRate);
+            voice->setVibratoParams(vibratoShape, vibratoAmount, vibratoRate);
             
             // ADSR Module Params
             auto& ampAtk = *apvts.getRawParameterValue("AMP_ATK");

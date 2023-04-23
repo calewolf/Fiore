@@ -30,7 +30,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         void setOscVibratoDepth(float semitones);
         void setOscSineLevel(float percent);
         void setFilterType(int filterTypeIdx);
-        void setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt);
+        void setFilterParams(float cutoffHz, float resonance, float driveAmt, float envAmt);
         void setFilterOnOff(bool filterShouldBeOn);
         void setMasterGain(float decibels);
         void setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz);
@@ -49,6 +49,8 @@ class SynthVoice: public juce::SynthesiserVoice {
         juce::ADSR adsr;
         juce::ADSR::Parameters adsrParams;
     
+        juce::dsp::Oscillator<float> lfo;
+    
         /// The mix between OSC1 and OSC2.
         float osc1MixRatio { 0.5 };
         /// The velocity from the last time `startNote` was called.
@@ -61,4 +63,9 @@ class SynthVoice: public juce::SynthesiserVoice {
         bool isPrepared {false};
         /// Whether the filter is on or off
         bool filterIsOn;
+    
+        float baseCutoffHz;
+    
+        /// How much the LFO actually modifies the filter's cutoff. Ranges from 0-1.
+        float lfoCutoffDepth;
 };

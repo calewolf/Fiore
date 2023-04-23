@@ -14,12 +14,11 @@ class EnvTab: public juce::Component {
         void configureLabel(juce::Component& slider, juce::Label& label, const juce::String& labelText);
         void configureSlider(juce::Slider& slider, const juce::String textValueSuffix, int numDecimalPlacesToDisplay, const juce::String& paramID, std::unique_ptr<SliderAttachment>& attachmentToCreate);
     
-        juce::AudioProcessorValueTreeState& apvts;
-    
         juce::Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
         juce::Label attackSliderLabel, decaySliderLabel, sustainSliderLabel, releaseSliderLabel;
         juce::Label titleLabel;
     
+        juce::AudioProcessorValueTreeState& apvts;
         std::unique_ptr<SliderAttachment> attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
 };
 

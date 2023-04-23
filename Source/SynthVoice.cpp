@@ -17,6 +17,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     osc2.prepare(spec);
     masterGain.prepare(spec);
     filter.prepare(spec);
+    lfo.prepare(spec);
     
     adsr.setSampleRate(sampleRate);
     isPrepared = true;
@@ -71,6 +72,21 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     
     // Apply filter
     if (filterIsOn) {
+        // Get the average value from -1 to 1 for the LFO's output on how much to alter the cutoff
+        float lfoOut = 0;
+        for (int s = 0; s < numSamples; s++) {
+            lfoOut += lfo.processSample(0.0f);
+        }
+        lfoOut /= ((float) numSamples);
+        
+        // Map the cutoff depth (0-1) to a value to modify the cutoff Hz by.
+        // FIXME: This is mapping from 0 to 1000 Hz. This needs to exist on an exponential scale.
+        auto cutoffMod = juce::jmap(lfoCutoffDepth, 0.0f, 1.0f, 0.0f, 1000.0f) * lfoOut;
+        auto newCutoff = baseCutoffHz + cutoffMod;
+        newCutoff = juce::jmin(juce::jmax(newCutoff, 20.0f), 20000.0f); // Clip to between 20 and 20k Hz
+        
+        std::cout << "Cutoff Freq: " << newCutoff << std::endl;
+        filter.setCutoffFrequencyHz(newCutoff);
         filter.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
     }
     
@@ -152,10 +168,11 @@ void SynthVoice::setFilterType(int filterTypeIdx) {
     filter.setMode(modeToAssign);
 }
 
-void SynthVoice::setFilterParams(float cutoffHz, float resonance, float lfoAmt, float envAmt) {
-    filter.setCutoffFrequencyHz(cutoffHz);
+void SynthVoice::setFilterParams(float cutoffHz, float resonance, float driveAmt, float envAmt) {
+    baseCutoffHz = cutoffHz;
     filter.setResonance(resonance);
-    // TODO: Implement LFO/ENV
+    filter.setDrive(juce::jmap(driveAmt, 0.0f, 1.0f, 1.0f, 10.0f));
+    // TODO: Implement envelope
 }
 
 void SynthVoice::setFilterOnOff(bool filterShouldBeOn) {
@@ -171,8 +188,32 @@ void SynthVoice::setMasterGain(float gainDecibels) {
 // Vibrato / LFO Module Setters
 
 void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) {
-    // TODO: Implement
-    return;
+    switch (lfoShapeId) {
+        case 0: // Saw up
+            lfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, -1.0f, 1.0f); }, 2);
+            break;
+        case 1: // Saw down
+            lfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
+            break;
+        case 2: // Tri
+            lfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a tri
+            break;
+        case 3: // Square
+            lfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
+            break;
+        case 4: // Noise
+            lfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a noise
+            break;
+        default:
+            jassertfalse;
+            break;
+    }
+    
+    lfoCutoffDepth = ampPercent; // 0.0 to 1.0
+    lfo.setFrequency(rateHz);
+    
+//    std::cout << "LFO Depth: " << ampPercent << std::endl;
+//    std::cout << "LFO freq Hz: " << rateHz << std::endl;
 }
 
 void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz) {
