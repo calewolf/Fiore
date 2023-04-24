@@ -1,8 +1,2 @@
-# Ignore everything in the root directory
-/*
-
-# Except for the following files and directories
-!.gitignore
-!/Source
-!/CapstoneSynth.jucer
-
+Builds/
+JuceLibraryCode/
