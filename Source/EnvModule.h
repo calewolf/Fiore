@@ -5,7 +5,7 @@
 class EnvTab: public juce::Component {
     public:
         using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-        EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts);
+        EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts, const String& paramIdPrefix);
         ~EnvTab();
         void paint (juce::Graphics&) override;
         void resized() override;

@@ -1,7 +1,7 @@
 #include <JuceHeader.h>
 #include "EnvModule.h"
 
-EnvTab::EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
+EnvTab::EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts, const String& paramIdPrefix): apvts(apvts) {
     // Title label
     addAndMakeVisible(titleLabel);
     titleLabel.setText(title, juce::dontSendNotification);
@@ -9,19 +9,19 @@ EnvTab::EnvTab(const String& title, juce::AudioProcessorValueTreeState& apvts): 
     titleLabel.setJustificationType(juce::Justification::centred);
     
     // Attack
-    configureSlider(attackSlider, "s", 1, "AMP_ATK", attackAttachment);
+    configureSlider(attackSlider, "s", 1, paramIdPrefix + "_ATK", attackAttachment);
     configureLabel(attackSlider, attackSliderLabel, "Atk");
     
     // Decay
-    configureSlider(decaySlider, "s", 1, "AMP_DEC", decayAttachment);
+    configureSlider(decaySlider, "s", 1, paramIdPrefix + "_DEC", decayAttachment);
     configureLabel(decaySlider, decaySliderLabel, "Dec");
     
     // Sustain
-    configureSlider(sustainSlider, "%", 0, "AMP_SUS", sustainAttachment);
+    configureSlider(sustainSlider, "%", 0, paramIdPrefix + "_SUS", sustainAttachment);
     configureLabel(sustainSlider, sustainSliderLabel, "Sus");
     
     // Release
-    configureSlider(releaseSlider, "s", 1, "AMP_REL", releaseAttachment);
+    configureSlider(releaseSlider, "s", 1, paramIdPrefix + "_REL", releaseAttachment);
     configureLabel(releaseSlider, releaseSliderLabel, "Rel");
 }
 
@@ -73,7 +73,7 @@ void EnvTab::resized() {
 
 // EnvModule stuff
 
-EnvModule::EnvModule(juce::AudioProcessorValueTreeState& apvts): ampEnvTab("AMP ENV", apvts), filterEnvTab("FILTER ENV", apvts) {
+EnvModule::EnvModule(juce::AudioProcessorValueTreeState& apvts): ampEnvTab("AMP ENV", apvts, "AMP"), filterEnvTab("FILTER ENV", apvts, "FILT") {
     addAndMakeVisible(tabs);
     tabs.addTab("Amplitude Env", juce::Colours::slategrey, &ampEnvTab, false);
     tabs.addTab("Filter Env", juce::Colours::slategrey.darker(), &filterEnvTab, false);

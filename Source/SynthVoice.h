@@ -45,10 +45,8 @@ class SynthVoice: public juce::SynthesiserVoice {
         CustomOscillator<float> osc1, osc2;
         juce::dsp::Gain<float> masterGain;
         juce::dsp::LadderFilter<float> filter;
-    
         juce::ADSR adsr;
-        juce::ADSR::Parameters adsrParams;
-    
+        juce::ADSR filterAdsr;
         juce::dsp::Oscillator<float> lfo;
     
         /// The mix between OSC1 and OSC2.
@@ -68,4 +66,7 @@ class SynthVoice: public juce::SynthesiserVoice {
     
         /// How much the LFO actually modifies the filter's cutoff. Ranges from 0-1.
         float lfoCutoffDepth;
+    
+        /// How much the filter envelope modifies the cutoff. Ranges from 0-1.
+        float filterEnvDepth;
 };

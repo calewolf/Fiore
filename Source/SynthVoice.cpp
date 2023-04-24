@@ -20,6 +20,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     lfo.prepare(spec);
     
     adsr.setSampleRate(sampleRate);
+    filterAdsr.setSampleRate(sampleRate);
     isPrepared = true;
 }
 
@@ -32,12 +33,14 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
     
     adsr.noteOn();
+    filterAdsr.noteOn();
     currentVelocity = velocity;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
     std::cout << "Note off!" << std::endl;
     adsr.noteOff();
+    filterAdsr.noteOff();
     if (!allowTailOff || !adsr.isActive()) {
         clearCurrentNote();
     }
@@ -72,20 +75,28 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     
     // Apply filter
     if (filterIsOn) {
+        // TODO: Modify baseCutoffHz according to the current value of the ADSR envelope.
+        
         // Get the average value from -1 to 1 for the LFO's output on how much to alter the cutoff
+        // Also get an estimate of the "current" value of the filter ADSR
         float lfoOut = 0;
+        float avgFiltAdsrOut = 0;
         for (int s = 0; s < numSamples; s++) {
             lfoOut += lfo.processSample(0.0f);
+            avgFiltAdsrOut += filterAdsr.getNextSample();
         }
         lfoOut /= ((float) numSamples);
+        avgFiltAdsrOut /= ((float) numSamples); // from 0 to 1
+        
+        // Modify the base cutoff according to the current env value and maximum env depth
+        auto baseCutoffMultiplier = juce::jmap(avgFiltAdsrOut, 0.0f, 1.0f, 1.0f - filterEnvDepth, 1.0f);
         
         // Map the cutoff depth (0-1) to a value to modify the cutoff Hz by.
         // FIXME: This is mapping from 0 to 1000 Hz. This needs to exist on an exponential scale.
         auto cutoffMod = juce::jmap(lfoCutoffDepth, 0.0f, 1.0f, 0.0f, 1000.0f) * lfoOut;
-        auto newCutoff = baseCutoffHz + cutoffMod;
+        auto newCutoff = (baseCutoffHz * baseCutoffMultiplier) + cutoffMod;
         newCutoff = juce::jmin(juce::jmax(newCutoff, 20.0f), 20000.0f); // Clip to between 20 and 20k Hz
         
-        std::cout << "Cutoff Freq: " << newCutoff << std::endl;
         filter.setCutoffFrequencyHz(newCutoff);
         filter.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
     }
@@ -172,7 +183,7 @@ void SynthVoice::setFilterParams(float cutoffHz, float resonance, float driveAmt
     baseCutoffHz = cutoffHz;
     filter.setResonance(resonance);
     filter.setDrive(juce::jmap(driveAmt, 0.0f, 1.0f, 1.0f, 10.0f));
-    // TODO: Implement envelope
+    filterEnvDepth = envAmt;
 }
 
 void SynthVoice::setFilterOnOff(bool filterShouldBeOn) {
@@ -211,27 +222,18 @@ void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rate
     
     lfoCutoffDepth = ampPercent; // 0.0 to 1.0
     lfo.setFrequency(rateHz);
-    
-//    std::cout << "LFO Depth: " << ampPercent << std::endl;
-//    std::cout << "LFO freq Hz: " << rateHz << std::endl;
 }
 
 void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz) {
     // TODO: Implement
-    return;
 }
 
 // Envelope Module Setters
 
-void SynthVoice::setAmpADSR(float attack, float decay, float sustain, float release){
-    adsrParams.attack = attack;
-    adsrParams.decay = decay;
-    adsrParams.sustain = sustain;
-    adsrParams.release = release;
-    adsr.setParameters(adsrParams);
+void SynthVoice::setAmpADSR(float attack, float decay, float sustain, float release) {
+    adsr.setParameters(juce::ADSR::Parameters {attack, decay, sustain, release});
 }
 
 void SynthVoice::setFilterADSR(float attack, float decay, float sustain, float release) {
-    // TODO: Implement
-    return;
+    filterAdsr.setParameters(juce::ADSR::Parameters {attack, decay, sustain, release});
 }
