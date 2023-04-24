@@ -45,8 +45,8 @@ OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): a
     configureSlider(sineLevelSlider, "%", 0, "SINE_LVL", sineLevelAttachment);
     configureLabel(sineLevelSlider, sineLevelSliderLabel, "Sine Level");
     
-    configureSlider(vibratoSlider, " st", 1, "VIBRATO", vibratoAttachment);
-    configureLabel(vibratoSlider, vibratoSliderLabel, "Vibrato");
+    configureSlider(mysterySlider, " st", 1, "MYSTERY", mysteryAttachment);
+    configureLabel(mysterySlider, mysterySliderLabel, "???");
     
     configureSlider(semitonesSlider, " st", 0, "DETUNE_SEMI", detuneSemiAttachment);
     configureLabel(semitonesSlider, semitonesSliderLabel, "Semitones");
@@ -123,7 +123,7 @@ void OscillatorModule::resized() {
     fb2.justifyContent = FlexBox::JustifyContent::spaceBetween;
     fb2.alignItems = FlexBox::AlignItems::center;
     fb2.items = {
-        juce::FlexItem(vibratoSlider).withWidth(80).withHeight(80).withMargin(margin),
+        juce::FlexItem(mysterySlider).withWidth(80).withHeight(80).withMargin(margin),
         juce::FlexItem(centsSlider).withWidth(80).withHeight(80).withMargin(margin)
     };
     

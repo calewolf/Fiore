@@ -12,12 +12,13 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = outputChannels;
     
-    // We *must* call `prepare` on each of the juce::dsp processors.
+    // Required to call `prepare` on each of the juce::dsp processors.
     osc1.prepare(spec);
     osc2.prepare(spec);
     masterGain.prepare(spec);
     filter.prepare(spec);
     lfo.prepare(spec);
+    vibratoLfo.prepare(spec);
     
     adsr.setSampleRate(sampleRate);
     filterAdsr.setSampleRate(sampleRate);
@@ -25,20 +26,15 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 }
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
-    std::cout << "Note on! Velocity: " << velocity << std::endl;
     baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    osc1.setFrequency(baseFreqHz, true);
     osc1.setLevel(velocity * osc1MixRatio);
-    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
-    
     adsr.noteOn();
     filterAdsr.noteOn();
     currentVelocity = velocity;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
-    std::cout << "Note off!" << std::endl;
     adsr.noteOff();
     filterAdsr.noteOff();
     if (!allowTailOff || !adsr.isActive()) {
@@ -68,15 +64,27 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     juce::dsp::AudioBlock<float> osc1AudioBlock {osc1Buffer};
     juce::dsp::AudioBlock<float> osc2AudioBlock {osc2Buffer};
     
+    // 1. Modify the oscillator frequencies based on the value from the Vibrato LFO
+    float vibratoLfoOut = 0;
+    for (int s = 0; s < numSamples; s++) {
+        vibratoLfoOut += vibratoLfo.processSample(0.0f);
+    }
+    vibratoLfoOut /= ((float) numSamples); // -1 to 1
+
+    // When vibratoDepth is 100%, I want to double/half the frequency
+    float multiplier = pow(juce::jmap(vibratoDepth, 0.0f, 1.0f, 1.0f, 1.15f), vibratoLfoOut);
+    float adjustedBaseFreq = baseFreqHz * multiplier;
+//    std::cout << "Adjusted freq: " << adjustedBaseFreq << " with multiplier " << multiplier << std::endl;
+    osc1.setFrequency(adjustedBaseFreq, true);
+    osc2.setFrequency(adjustedBaseFreq * pow(2, detuneSemitones / 12.0), true);
+    
     // 1. Get sounds from the oscillators and add them
     osc1.process(juce::dsp::ProcessContextReplacing<float> (osc1AudioBlock));
     osc2.process(juce::dsp::ProcessContextReplacing<float> (osc2AudioBlock));
     osc2AudioBlock += osc1AudioBlock;
     
-    // Apply filter
+    // 2. Apply filter
     if (filterIsOn) {
-        // TODO: Modify baseCutoffHz according to the current value of the ADSR envelope.
-        
         // Get the average value from -1 to 1 for the LFO's output on how much to alter the cutoff
         // Also get an estimate of the "current" value of the filter ADSR
         float lfoOut = 0;
@@ -86,28 +94,28 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
             avgFiltAdsrOut += filterAdsr.getNextSample();
         }
         lfoOut /= ((float) numSamples);
-        avgFiltAdsrOut /= ((float) numSamples); // from 0 to 1
+        avgFiltAdsrOut /= ((float) numSamples);
         
-        // Modify the base cutoff according to the current env value and maximum env depth
+        // 2.1 Modify the base cutoff according to the current env value and maximum env depth
         auto baseCutoffMultiplier = juce::jmap(avgFiltAdsrOut, 0.0f, 1.0f, 1.0f - filterEnvDepth, 1.0f);
         
-        // Map the cutoff depth (0-1) to a value to modify the cutoff Hz by.
+        // 2.2 Add/subtract from the base cutoff according to the LFO value
         // FIXME: This is mapping from 0 to 1000 Hz. This needs to exist on an exponential scale.
         auto cutoffMod = juce::jmap(lfoCutoffDepth, 0.0f, 1.0f, 0.0f, 1000.0f) * lfoOut;
         auto newCutoff = (baseCutoffHz * baseCutoffMultiplier) + cutoffMod;
-        newCutoff = juce::jmin(juce::jmax(newCutoff, 20.0f), 20000.0f); // Clip to between 20 and 20k Hz
+        newCutoff = juce::jmin(juce::jmax(newCutoff, 20.0f), 20000.0f);
         
         filter.setCutoffFrequencyHz(newCutoff);
         filter.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
     }
     
-    // 2. Apply amplitude ADSR
+    // 3. Apply amplitude ADSR
     adsr.applyEnvelopeToBuffer(osc2Buffer, 0, osc2Buffer.getNumSamples());
     
-    // 2. Apply master gain
+    // 4. Apply master gain
     masterGain.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
     
-    // 3. Add the current channel's audio data to the larger outputBuffer
+    // 5. Add the current channel's audio data to the larger outputBuffer
     for (int channel = 0; channel < outputBuffer.getNumChannels(); channel++) {
         outputBuffer.addFrom(channel, startSample, osc2Buffer, channel, 0, numSamples);
     }
@@ -136,12 +144,7 @@ void SynthVoice::setOscGainRatios(float val) {
 
 void SynthVoice::setOscDetune(int semitones, int cents) {
     detuneSemitones = semitones + ((float) cents / 100.0);
-    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
-}
-
-void SynthVoice::setOscVibratoDepth(float semitones) {
-    // TODO: Implement
-    return;
+//    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
 }
 
 void SynthVoice::setOscSineLevel(float percent) {
@@ -225,7 +228,29 @@ void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rate
 }
 
 void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz) {
-    // TODO: Implement
+    switch (lfoShapeId) {
+        case 0: // Saw up
+            vibratoLfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, -1.0f, 1.0f); }, 2);
+            break;
+        case 1: // Saw down
+            vibratoLfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
+            break;
+        case 2: // Tri
+            vibratoLfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a tri
+            break;
+        case 3: // Square
+            vibratoLfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
+            break;
+        case 4: // Noise
+            vibratoLfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a noise
+            break;
+        default:
+            jassertfalse;
+            break;
+    }
+    
+    vibratoDepth = ampPercent; // 0.0 to 1.0
+    vibratoLfo.setFrequency(rateHz);
 }
 
 // Envelope Module Setters

@@ -2,6 +2,9 @@
 #include <JuceHeader.h>
 #include "CustomOsc.h"
 
+/**
+ This class is kind of useless but is required by the Synthesiser class.
+*/
 class SynthSound: public juce::SynthesiserSound {
     public:
         SynthSound() {}
@@ -9,6 +12,9 @@ class SynthSound: public juce::SynthesiserSound {
         bool appliesToChannel (int) override { return true; }
 };
 
+/**
+    Represents a single voice being played in the synth. Contains all the DSP / audio processing code to render sounds.
+*/
 class SynthVoice: public juce::SynthesiserVoice {
     public:
         // SynthesiserVoice overrides
@@ -27,7 +33,6 @@ class SynthVoice: public juce::SynthesiserVoice {
         void setOscWaveform(int waveformId, int oscNum);
         void setOscGainRatios(float osc1Amount);
         void setOscDetune(int semitones, int cents);
-        void setOscVibratoDepth(float semitones);
         void setOscSineLevel(float percent);
         void setFilterType(int filterTypeIdx);
         void setFilterParams(float cutoffHz, float resonance, float driveAmt, float envAmt);
@@ -48,6 +53,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         juce::ADSR adsr;
         juce::ADSR filterAdsr;
         juce::dsp::Oscillator<float> lfo;
+        juce::dsp::Oscillator<float> vibratoLfo;
     
         /// The mix between OSC1 and OSC2.
         float osc1MixRatio { 0.5 };
@@ -66,6 +72,8 @@ class SynthVoice: public juce::SynthesiserVoice {
     
         /// How much the LFO actually modifies the filter's cutoff. Ranges from 0-1.
         float lfoCutoffDepth;
+    
+        float vibratoDepth;
     
         /// How much the filter envelope modifies the cutoff. Ranges from 0-1.
         float filterEnvDepth;

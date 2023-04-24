@@ -39,9 +39,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", juce::StringArray {"Saw", "Square", "Noise"}, 0));
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", juce::StringArray {"Saw", "Square", "Triangle"}, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("MYSTERY", 1), "???", 0.0, 1.0, 0.0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_CENTS", 1), "Osc. 2 Detune (Cents)", -50, 50, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_SEMI", 1), "Osc. 2 Detune (Semitones)", -24, 24, 0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("VIBRATO", 1), "Vibrato Depth", 0.0, 36.0, 0.0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("SINE_LVL", 1), "Sine Osc. Level", 0.0, 1.0, 0.0));
     
     // Filter Module Params
@@ -64,11 +64,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     rateRange.setSkewForCentre(15.0);
     juce::StringArray lfoShapeOptions { "Saw Up", "Saw Down", "Tri", "Square", "Noise" };
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("LFO_SHAPE", 1), "Filter LFO Shape", lfoShapeOptions, 2));
-    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("LFO_AMOUNT", 1), "Filter LFO Amount", 0, 100, 25));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("LFO_AMOUNT", 1), "Filter LFO Amount", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("LFO_RATE", 1), "Filter LFO Rate", rateRange, 1.0));
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("VIB_SHAPE", 1), "Vibrato Shape", lfoShapeOptions, 2));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("VIB_AMOUNT", 1), "Vibrato Amount", 0, 100, 0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("VIB_RATE", 1), "Vibrato Rate", rateRange, 1.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("VIB_RATE", 1), "Vibrato Rate", rateRange, 5.0));
     
     // ADSR Module Params
     juce::NormalisableRange<float> attackRange {0.0001, 10.0, 0.0001}; // sec
@@ -100,13 +100,11 @@ void CapstoneSynthAudioProcessor::updateParams() {
             auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
             auto& osc2DetuneCents = *apvts.getRawParameterValue("DETUNE_CENTS");
             auto& osc2DetuneSemi = *apvts.getRawParameterValue("DETUNE_SEMI");
-            auto& vibratoDepth = *apvts.getRawParameterValue("VIBRATO");
             auto& sineLevel = *apvts.getRawParameterValue("SINE_LVL");
             voice->setOscWaveform(osc1Choice.load(), 1);
             voice->setOscWaveform(osc2Choice.load(), 2);
             voice->setOscGainRatios(osc1GainRatio.load());
             voice->setOscDetune(osc2DetuneSemi, osc2DetuneCents);
-            voice->setOscVibratoDepth(vibratoDepth.load());
             voice->setOscSineLevel(sineLevel.load());
             
             // Filter Module Params
