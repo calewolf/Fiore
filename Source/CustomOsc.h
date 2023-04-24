@@ -1,6 +1,9 @@
 #pragma once
 #include <JuceHeader.h>
 
+/**
+    A combination of an oscillator and a gain.
+*/
 template <typename Type>
 class CustomOscillator {
     public:

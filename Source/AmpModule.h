@@ -2,6 +2,9 @@
 
 #include <JuceHeader.h>
 
+/**
+    A module that controls the master gain of the synthesizer.
+*/
 class AmpModule: public juce::Component {
     public:
         AmpModule(juce::AudioProcessorValueTreeState& apvts);

@@ -2,6 +2,9 @@
 
 #include <JuceHeader.h>
 
+/**
+    The module containing controls for the synthesizer's oscillators.
+*/
 class OscillatorModule: public juce::Component, Button::Listener {
     public:
         OscillatorModule(juce::AudioProcessorValueTreeState& apvts);

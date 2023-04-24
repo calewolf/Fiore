@@ -1,6 +1,9 @@
 #pragma once
 #include <JuceHeader.h>
 
+/**
+    A single tab of the `LFOVibratoModule`. Used for both cutoff modulation and vibrato.
+*/
 class LFOTab: public juce::Component, Button::Listener {
     public:
         LFOTab(const String& title, juce::AudioProcessorValueTreeState& apvts, const String& paramIdPrefix);
@@ -33,6 +36,9 @@ class LFOTab: public juce::Component, Button::Listener {
         
 };
 
+/**
+    A module to allow users to control an LFO. Used for both filter cutoff modulation and vibrato.
+*/
 class LFOVibratoModule: public juce::Component {
     public:
         LFOVibratoModule(juce::AudioProcessorValueTreeState& apvts);

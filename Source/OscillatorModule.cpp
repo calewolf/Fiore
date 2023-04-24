@@ -43,7 +43,7 @@ OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): a
     
     // Rotary sliders
     configureSlider(sineLevelSlider, "%", 0, "SINE_LVL", sineLevelAttachment);
-    configureLabel(sineLevelSlider, sineLevelSliderLabel, "Sine Level");
+    configureLabel(sineLevelSlider, sineLevelSliderLabel, "???");
     
     configureSlider(mysterySlider, " st", 1, "MYSTERY", mysteryAttachment);
     configureLabel(mysterySlider, mysterySliderLabel, "???");

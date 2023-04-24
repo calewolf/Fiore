@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include <JuceHeader.h>
@@ -17,22 +9,24 @@
 #include "LFOVibratoModule.h"
 #include "EnvModule.h"
 
+/**
+    The main entrypoint for the synth's GUI. Contains subcomponents for each module of the synth.
+*/
 class Editor: public AudioProcessorEditor {
-    
-public:
-    Editor(CapstoneSynthAudioProcessor&);
-    ~Editor() override;
-    void paint(juce::Graphics&) override;
-    void resized() override;
+    public:
+        Editor(CapstoneSynthAudioProcessor&);
+        ~Editor() override;
+        void paint(juce::Graphics&) override;
+        void resized() override;
 
-private:
-    CapstoneSynthAudioProcessor& audioProcessor;
-    
-    OscillatorModule oscModule;
-    FilterModule filterModule;
-    LFOVibratoModule lfoVibratoModule;
-    EnvModule envModule;
-    AmpModule ampModule;
+    private:
+        CapstoneSynthAudioProcessor& audioProcessor;
+        
+        OscillatorModule oscModule;
+        FilterModule filterModule;
+        LFOVibratoModule lfoVibratoModule;
+        EnvModule envModule;
+        AmpModule ampModule;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)
 };

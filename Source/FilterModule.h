@@ -2,6 +2,9 @@
 
 #include <JuceHeader.h>
 
+/**
+    A module for the synth's filter. Lets user select filter type, and adjust various parameters.
+*/
 class FilterModule: public juce::Component, public juce::Button::Listener {
     public:
         FilterModule(juce::AudioProcessorValueTreeState& apvts);

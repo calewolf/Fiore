@@ -1,18 +1,11 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include <JuceHeader.h>
 #include "SynthVoice.h"
 
-//==============================================================================
 /**
+    The main entrypoint class for handing audio processing for the synth.
+    It wraps the Sythesiser class and handles all audio parameters that interface with the GUI.
 */
 class CapstoneSynthAudioProcessor  : public juce::AudioProcessor {
 public:
@@ -25,7 +18,7 @@ public:
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     juce::AudioProcessorValueTreeState& getAPVTS();
     
-    // Buncha JUCE Garbage
+    // Buncha JUCE garbage
    #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif

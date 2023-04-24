@@ -3,7 +3,7 @@
 #include "CustomOsc.h"
 
 /**
- This class is kind of useless but is required by the Synthesiser class.
+    This class is kind of useless but is required by the Synthesiser class.
 */
 class SynthSound: public juce::SynthesiserSound {
     public:
@@ -44,9 +44,16 @@ class SynthVoice: public juce::SynthesiserVoice {
         void setFilterADSR(float attack, float decay, float sustain, float release);
         
     private:
+        /// Calculates the adjusted `baseFreqHz` after vibrato is applied.
+        float getNewFreqFromVibratoLFO(int numSamples);
+    
+        /// Calculates the adjusted `baseCutoffHz` after the filter LFO and envelope are applied.
+        float getCutoffFromEnvAndLFO(int numSamples);
+    
+        // Temp buffers to load processed signals into
         juce::AudioBuffer<float> osc1Buffer, osc2Buffer;
     
-        // DSP Components:
+        // Things that modify/process the oscillator audio:
         CustomOscillator<float> osc1, osc2;
         juce::dsp::Gain<float> masterGain;
         juce::dsp::LadderFilter<float> filter;
@@ -55,26 +62,25 @@ class SynthVoice: public juce::SynthesiserVoice {
         juce::dsp::Oscillator<float> lfo;
         juce::dsp::Oscillator<float> vibratoLfo;
     
-        /// The mix between OSC1 and OSC2.
+        // Helper Variables
+        /// The mix between OSC1 and OSC2. 1.0 = 100% OSC1.
         float osc1MixRatio { 0.5 };
         /// The velocity from the last time `startNote` was called.
         float currentVelocity;
-        /// The amount of semitones to detune Oscillator 2 by.
-        float detuneSemitones;
         /// The frequency from the last time `startNote` was called.
         float baseFreqHz;
-        /// An error flag to indicate that `prepareToPlay` finished, so that `renderNextBlock` doesn't call prematurely.
-        bool isPrepared {false};
+        /// The amount of semitones to detune Oscillator 2 by.
+        float detuneSemitones;
         /// Whether the filter is on or off
         bool filterIsOn;
-    
+        /// The "center" cutoff frequency from the filter.
         float baseCutoffHz;
-    
         /// How much the LFO actually modifies the filter's cutoff. Ranges from 0-1.
         float lfoCutoffDepth;
-    
+        /// How much the vibrato LFO modifies the pitch. Ranges from 0-1.
         float vibratoDepth;
-    
         /// How much the filter envelope modifies the cutoff. Ranges from 0-1.
         float filterEnvDepth;
+        /// An error flag to indicate that `prepareToPlay` finished, so that `renderNextBlock` doesn't get called prematurely.
+        bool isPrepared {false};
 };

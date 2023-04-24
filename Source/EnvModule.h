@@ -2,6 +2,9 @@
 
 #include <JuceHeader.h>
 
+/**
+    A single tab of the EnvModule. Is reused for both amplitude and filter envelopes.
+*/
 class EnvTab: public juce::Component {
     public:
         using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
@@ -22,6 +25,9 @@ class EnvTab: public juce::Component {
         std::unique_ptr<SliderAttachment> attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
 };
 
+/**
+    A module containing sliders to control an ADSR envelope. Used to control both amplitude and filter cutoff envelopes.
+*/
 class EnvModule: public juce::Component {
     public:
         EnvModule(juce::AudioProcessorValueTreeState& apvts);
