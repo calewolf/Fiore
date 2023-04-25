@@ -43,16 +43,16 @@ OscillatorModule::OscillatorModule(juce::AudioProcessorValueTreeState& apvts): a
     
     // Rotary sliders
     configureSlider(sineLevelSlider, "%", 0, "SINE_LVL", sineLevelAttachment);
-    configureLabel(sineLevelSlider, sineLevelSliderLabel, "???");
+    configureLabel(sineLevelSlider, sineLevelSliderLabel, "Sine Osc");
     
-    configureSlider(mysterySlider, " st", 1, "MYSTERY", mysteryAttachment);
-    configureLabel(mysterySlider, mysterySliderLabel, "???");
+    configureSlider(osc1CentsSlider, " c", 1, "DETUNE_CENTS_1", osc1CentsAttachment);
+    configureLabel(osc1CentsSlider, osc1CentsSliderLabel, "Cents (OSC1)");
     
     configureSlider(semitonesSlider, " st", 0, "DETUNE_SEMI", detuneSemiAttachment);
-    configureLabel(semitonesSlider, semitonesSliderLabel, "Semitones");
+    configureLabel(semitonesSlider, semitonesSliderLabel, "Semi (OSC2)");
     
     configureSlider(centsSlider, " c", 0, "DETUNE_CENTS", detuneCentsAttachment);
-    configureLabel(centsSlider, centsSliderLabel, "Cents");
+    configureLabel(centsSlider, centsSliderLabel, "Cents (OSC2)");
     
     // Osc mix slider
     addAndMakeVisible(oscMixSlider);
@@ -123,7 +123,7 @@ void OscillatorModule::resized() {
     fb2.justifyContent = FlexBox::JustifyContent::spaceBetween;
     fb2.alignItems = FlexBox::AlignItems::center;
     fb2.items = {
-        juce::FlexItem(mysterySlider).withWidth(80).withHeight(80).withMargin(margin),
+        juce::FlexItem(osc1CentsSlider).withWidth(80).withHeight(80).withMargin(margin),
         juce::FlexItem(centsSlider).withWidth(80).withHeight(80).withMargin(margin)
     };
     

@@ -39,10 +39,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", 0, 3, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", 0, 3, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("MYSTERY", 1), "???", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_CENTS_1", 1), "Osc. 1 Detune (Cents)", -50, 50, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_CENTS", 1), "Osc. 2 Detune (Cents)", -50, 50, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_SEMI", 1), "Osc. 2 Detune (Semitones)", -24, 24, 0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("SINE_LVL", 1), "Sine Osc. Level", 0.0, 1.0, 0.0));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("SINE_LVL", 1), "Sine Osc. Level", 0, 100, 0));
     
     // Filter Module Params
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("FILT_TYPE", 1), "Filter Type", juce::StringArray {"LPF12", "HPF12", "BPF12", "LPF24", "HPF24", "BPF24"}, 0));
@@ -98,14 +98,16 @@ void CapstoneSynthAudioProcessor::updateParams() {
             auto& osc1Choice = *apvts.getRawParameterValue("OSC1_WAVE");
             auto& osc2Choice = *apvts.getRawParameterValue("OSC2_WAVE");
             auto& osc1GainRatio = *apvts.getRawParameterValue("OSC1_GAIN_RATIO");
+            auto& osc1DetuneCents = *apvts.getRawParameterValue("DETUNE_CENTS_1");
             auto& osc2DetuneCents = *apvts.getRawParameterValue("DETUNE_CENTS");
             auto& osc2DetuneSemi = *apvts.getRawParameterValue("DETUNE_SEMI");
-            auto& sineLevel = *apvts.getRawParameterValue("SINE_LVL");
+            double sineLevel = *apvts.getRawParameterValue("SINE_LVL") / 100.0;
             voice->setOscWaveform(osc1Choice.load(), 1);
             voice->setOscWaveform(osc2Choice.load(), 2);
             voice->setOscGainRatios(osc1GainRatio.load());
-            voice->setOscDetune(osc2DetuneSemi, osc2DetuneCents);
-            voice->setOscSineLevel(sineLevel.load());
+            voice->setOscDetune(0, osc1DetuneCents, 1);
+            voice->setOscDetune(osc2DetuneSemi, osc2DetuneCents, 2);
+            voice->setOscSineLevel(sineLevel);
             
             // Filter Module Params
             auto& filtType = *apvts.getRawParameterValue("FILT_TYPE");

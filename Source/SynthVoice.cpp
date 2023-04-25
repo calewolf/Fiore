@@ -15,11 +15,13 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     // Required to call `prepare` on each of the juce::dsp processors.
     osc1.prepare(spec);
     osc2.prepare(spec);
+    sineOsc.prepare(spec);
     masterGain.prepare(spec);
     filter.prepare(spec);
     lfo.prepare(spec);
     vibratoLfo.prepare(spec);
     
+    sineOsc.setWaveform(4); // set to sine wave
     adsr.setSampleRate(sampleRate);
     filterAdsr.setSampleRate(sampleRate);
     isPrepared = true;
@@ -29,6 +31,7 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     osc1.setLevel(velocity * osc1MixRatio);
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
+    sineOsc.setLevel(velocity * sineLevel);
     adsr.noteOn();
     filterAdsr.noteOn();
     currentVelocity = velocity;
@@ -59,20 +62,26 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     // 0. Clear and resize a temp buffer to put our processed signal into
     osc1Buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
     osc2Buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    sineBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
     osc1Buffer.clear();
     osc2Buffer.clear();
+    sineBuffer.clear();
     juce::dsp::AudioBlock<float> osc1AudioBlock {osc1Buffer};
     juce::dsp::AudioBlock<float> osc2AudioBlock {osc2Buffer};
+    juce::dsp::AudioBlock<float> sineAudioBlock {sineBuffer};
     
    // 1. Adjust the oscillators' frequencies with vibrato
     float adjustedBaseFreq = getNewFreqFromVibratoLFO(numSamples);
-    osc1.setFrequency(adjustedBaseFreq, true);
-    osc2.setFrequency(adjustedBaseFreq * pow(2, detuneSemitones / 12.0), true);
+    osc1.setFrequency(adjustedBaseFreq * pow(2, osc1DetuneSemitones / 12.0), true);
+    osc2.setFrequency(adjustedBaseFreq * pow(2, osc2DetuneSemitones / 12.0), true);
+    sineOsc.setFrequency(adjustedBaseFreq, true);
     
     // 1. Get sounds from the oscillators and add them
     osc1.process(juce::dsp::ProcessContextReplacing<float> (osc1AudioBlock));
     osc2.process(juce::dsp::ProcessContextReplacing<float> (osc2AudioBlock));
+    sineOsc.process(juce::dsp::ProcessContextReplacing<float> (sineAudioBlock));
     osc2AudioBlock += osc1AudioBlock;
+    osc2AudioBlock += sineAudioBlock;
     
     // 2. Apply filter (modulated with envelope, filter LFO)
     if (filterIsOn) {
@@ -144,14 +153,17 @@ void SynthVoice::setOscGainRatios(float val) {
     osc2.setLevel(currentVelocity * (1.0 - osc1MixRatio));
 }
 
-void SynthVoice::setOscDetune(int semitones, int cents) {
-    detuneSemitones = semitones + ((float) cents / 100.0);
-//    osc2.setFrequency(baseFreqHz * pow(2, detuneSemitones / 12.0), true);
+void SynthVoice::setOscDetune(int semitones, int cents, int oscNum) {
+    if (oscNum == 1) {
+        osc1DetuneSemitones = ((float) cents / 100.0);
+    } else if (oscNum == 2) {
+        osc2DetuneSemitones = semitones + ((float) cents / 100.0);
+    }
 }
 
 void SynthVoice::setOscSineLevel(float percent) {
-    // TODO: Implement
-    return;
+    sineLevel = percent;
+    sineOsc.setLevel(currentVelocity * percent);
 }
 
 // Filter Module Setters

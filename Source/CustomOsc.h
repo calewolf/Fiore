@@ -63,6 +63,9 @@ class CustomOscillator {
                 case 3:
                     osc.initialise ([this](Type x) { return 2.0f * random.nextFloat() - 1.0f; }); // white noise
                     break;
+                case 4:
+                    osc.initialise ([](Type x) { return std::sin (x); }, 128); // sine
+                    break;
                 default:
                     jassertfalse;
                     break;

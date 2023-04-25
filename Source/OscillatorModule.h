@@ -31,8 +31,8 @@ class OscillatorModule: public juce::Component, Button::Listener {
         juce::ToggleButton sawButton2 {"Saw"}, squareButton2 {"Square"}, triButton2 {"Tri"};
     
         // Various oscillator parameters
-        juce::Label sineLevelSliderLabel, mysterySliderLabel, semitonesSliderLabel, centsSliderLabel;
-        juce::Slider sineLevelSlider, mysterySlider, semitonesSlider, centsSlider;
+        juce::Label sineLevelSliderLabel, osc1CentsSliderLabel, semitonesSliderLabel, centsSliderLabel;
+        juce::Slider sineLevelSlider, osc1CentsSlider, semitonesSlider, centsSlider;
     
         // Mix of % OSC1 vs. % OSC2
         juce::Label oscMixSliderLabel1, oscMixSliderLabel2;
@@ -43,7 +43,7 @@ class OscillatorModule: public juce::Component, Button::Listener {
     
         // Stuff for attaching sliders to parameters
         juce::AudioProcessorValueTreeState& apvts;
-        std::unique_ptr<SliderAttachment> osc1GainRatioAttachment, detuneCentsAttachment, detuneSemiAttachment, mysteryAttachment, sineLevelAttachment;
+        std::unique_ptr<SliderAttachment> osc1GainRatioAttachment, detuneCentsAttachment, detuneSemiAttachment, osc1CentsAttachment, sineLevelAttachment;
         
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscillatorModule)
 };

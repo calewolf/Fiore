@@ -32,7 +32,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         // Functions to change synth parameters
         void setOscWaveform(int waveformId, int oscNum);
         void setOscGainRatios(float osc1Amount);
-        void setOscDetune(int semitones, int cents);
+        void setOscDetune(int semitones, int cents, int oscNum);
         void setOscSineLevel(float percent);
         void setFilterType(int filterTypeIdx);
         void setFilterParams(float cutoffHz, float resonance, float driveAmt, float envAmt);
@@ -51,10 +51,10 @@ class SynthVoice: public juce::SynthesiserVoice {
         float getCutoffFromEnvAndLFO(int numSamples);
     
         // Temp buffers to load processed signals into
-        juce::AudioBuffer<float> osc1Buffer, osc2Buffer;
+        juce::AudioBuffer<float> osc1Buffer, osc2Buffer, sineBuffer;
     
         // Things that modify/process the oscillator audio:
-        CustomOscillator<float> osc1, osc2;
+        CustomOscillator<float> osc1, osc2, sineOsc;
         juce::dsp::Gain<float> masterGain;
         juce::dsp::LadderFilter<float> filter;
         juce::ADSR adsr;
@@ -65,12 +65,16 @@ class SynthVoice: public juce::SynthesiserVoice {
         // Helper Variables
         /// The mix between OSC1 and OSC2. 1.0 = 100% OSC1.
         float osc1MixRatio { 0.5 };
+        /// The amount of sine to mix into the signal.
+        float sineLevel;
         /// The velocity from the last time `startNote` was called.
         float currentVelocity;
         /// The frequency from the last time `startNote` was called.
         float baseFreqHz;
         /// The amount of semitones to detune Oscillator 2 by.
-        float detuneSemitones;
+        float osc2DetuneSemitones;
+        /// The amount of semitones to detune Oscillator 1 by.
+        float osc1DetuneSemitones;
         /// Whether the filter is on or off
         bool filterIsOn;
         /// The "center" cutoff frequency from the filter.
