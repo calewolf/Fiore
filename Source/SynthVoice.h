@@ -83,4 +83,6 @@ class SynthVoice: public juce::SynthesiserVoice {
         float filterEnvDepth;
         /// An error flag to indicate that `prepareToPlay` finished, so that `renderNextBlock` doesn't get called prematurely.
         bool isPrepared {false};
+        /// A Random object for use in creating white noise
+        Random random;
 };

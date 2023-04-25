@@ -36,8 +36,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
     
     // Oscillator Module Params
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", juce::StringArray {"Saw", "Square", "Noise"}, 0));
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", juce::StringArray {"Saw", "Square", "Triangle"}, 0));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("OSC1_WAVE", 1), "Oscillator 1 Waveform", 0, 3, 0));
+    params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("OSC2_WAVE", 1), "Oscillator 2 Waveform", 0, 3, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("OSC1_GAIN_RATIO", 1), "Oscillator 1 Gain Ratio", 0.0, 1.0, 1.0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("MYSTERY", 1), "???", 0.0, 1.0, 0.0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("DETUNE_CENTS", 1), "Osc. 2 Detune (Cents)", -50, 50, 0));
@@ -60,9 +60,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("GAIN", 1), "Global Gain", gainRange, 0.0));
     
     // LFO/Vibrato Module Params
-    juce::NormalisableRange<float> rateRange {-0.01, 200.0, 0.01};
+    juce::NormalisableRange<float> rateRange {0.01, 200.0, 0.01};
     rateRange.setSkewForCentre(15.0);
-    juce::StringArray lfoShapeOptions { "Saw Up", "Saw Down", "Tri", "Square", "Noise" };
+    juce::StringArray lfoShapeOptions { "Saw Up", "Saw Down", "Tri", "Square"};
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("LFO_SHAPE", 1), "Filter LFO Shape", lfoShapeOptions, 2));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("LFO_AMOUNT", 1), "Filter LFO Amount", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("LFO_RATE", 1), "Filter LFO Rate", rateRange, 1.0));

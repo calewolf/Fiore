@@ -212,14 +212,18 @@ void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rate
             lfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
             break;
         case 2: // Tri
-            lfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a tri
+            lfo.initialise([](float x) { // triangle
+                if (x < 0.0f) {
+                    return juce::jmap (x, -juce::MathConstants<float>::pi, 0.0f, -1.0f, 1.0f);
+                } else {
+                    return juce::jmap (x, 0.0f, juce::MathConstants<float>::pi, 1.0f, -1.0f);
+                }
+            }, 3);
             break;
         case 3: // Square
             lfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
             break;
-        case 4: // Noise
-            lfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a noise
-            break;
+            // TODO: Add a noise option
         default:
             jassertfalse;
             break;
@@ -238,14 +242,18 @@ void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz
             vibratoLfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
             break;
         case 2: // Tri
-            vibratoLfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a tri
+            vibratoLfo.initialise([](float x) { // triangle
+                if (x < 0.0f) {
+                    return juce::jmap (x, -juce::MathConstants<float>::pi, 0.0f, -1.0f, 1.0f);
+                } else {
+                    return juce::jmap (x, 0.0f, juce::MathConstants<float>::pi, 1.0f, -1.0f);
+                }
+            }, 3);
             break;
         case 3: // Square
             vibratoLfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
             break;
-        case 4: // Noise
-            vibratoLfo.initialise ([](float x) { return std::sin (x); }, 128); // TODO: Make a noise
-            break;
+        // TODO: Add a noise option
         default:
             jassertfalse;
             break;

@@ -16,15 +16,12 @@ LFOTab::LFOTab(const String& title, juce::AudioProcessorValueTreeState& apvts, c
     triangleButton.setRadioGroupId(RadioGroupID::group1);
     addAndMakeVisible(squareButton);
     squareButton.setRadioGroupId(RadioGroupID::group1);
-    addAndMakeVisible(noiseButton);
-    noiseButton.setRadioGroupId(RadioGroupID::group1);
     triangleButton.setToggleState(true, juce::dontSendNotification);
     
     sawUpButton.addListener(this);
     sawDownButton.addListener(this);
     triangleButton.addListener(this);
     squareButton.addListener(this);
-    noiseButton.addListener(this);
     
     // Amount slider
     addAndMakeVisible(lfoAmountSlider);
@@ -81,7 +78,6 @@ void LFOTab::resized() {
         juce::FlexItem(sawDownButton).withWidth(100).withHeight(24),
         juce::FlexItem(triangleButton).withWidth(100).withHeight(24),
         juce::FlexItem(squareButton).withWidth(100).withHeight(24),
-        juce::FlexItem(noiseButton).withWidth(100).withHeight(24)
     };
     
     juce::FlexBox col2;
@@ -113,8 +109,6 @@ void LFOTab::buttonClicked(Button* button) {
         apvts.getParameterAsValue(paramIdPrefix + "_SHAPE") = 2;
     } else if (button == &squareButton) {
         apvts.getParameterAsValue(paramIdPrefix + "_SHAPE") = 3;
-    } else if (button == &noiseButton) {
-        apvts.getParameterAsValue(paramIdPrefix + "_SHAPE") = 4;
     }
 }
 

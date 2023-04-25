@@ -25,8 +25,7 @@ class LFOTab: public juce::Component, Button::Listener {
         juce::ToggleButton sawUpButton {"Saw (asc)"},
                            sawDownButton {"Saw (desc)"},
                            triangleButton {"Triangle"},
-                           squareButton {"Square"},
-                           noiseButton {"Noise"};
+                            squareButton {"Square"};
     
         juce::Label lfoTabLabel;
     
