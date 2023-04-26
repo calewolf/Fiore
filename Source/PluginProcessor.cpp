@@ -131,8 +131,8 @@ void CapstoneSynthAudioProcessor::updateParams() {
             auto& vibratoShape = *apvts.getRawParameterValue("VIB_SHAPE");
             double vibratoAmount = *apvts.getRawParameterValue("VIB_AMOUNT") / 100.0;
             auto& vibratoRate = *apvts.getRawParameterValue("VIB_RATE");
-            voice->setFilterLFOParams(lfoShape, lfoAmount, lfoRate);
-            voice->setVibratoParams(vibratoShape, vibratoAmount, vibratoRate);
+            voice->setLFOParams(lfoShape, lfoAmount, lfoRate, 1);
+            voice->setLFOParams(vibratoShape, vibratoAmount, vibratoRate, 2);
             
             // ADSR Module Params
             auto& ampAtk = *apvts.getRawParameterValue("AMP_ATK");
@@ -259,14 +259,20 @@ juce::AudioProcessorEditor* CapstoneSynthAudioProcessor::createEditor() {
 }
 
 void CapstoneSynthAudioProcessor::getStateInformation (juce::MemoryBlock& destData) {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    // From juce tutorial: https://docs.juce.com/master/tutorial_audio_processor_value_tree_state.html
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void CapstoneSynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    // From juce tutorial: https://docs.juce.com/master/tutorial_audio_processor_value_tree_state.html
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState.get() != nullptr) {
+        if (xmlState->hasTagName (apvts.state.getType())) {
+            apvts.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
+    }
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {

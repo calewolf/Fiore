@@ -21,7 +21,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     lfo.prepare(spec);
     vibratoLfo.prepare(spec);
     
-    sineOsc.setWaveform(4); // set to sine wave
+    sineOsc.setWaveform(4);
     adsr.setSampleRate(sampleRate);
     filterAdsr.setSampleRate(sampleRate);
     isPrepared = true;
@@ -34,7 +34,7 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     sineOsc.setLevel(velocity * sineLevel);
     adsr.noteOn();
     filterAdsr.noteOn();
-    currentVelocity = velocity;
+    currentVelocity = velocity * 0.5;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
@@ -215,16 +215,18 @@ void SynthVoice::setMasterGain(float gainDecibels) {
 
 // Vibrato / LFO Module Setters
 
-void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz) {
+void SynthVoice::setLFOParams(int lfoShapeId, float ampPercent, float rateHz, int lfoIdToModify) {
+    auto& lfoToModify = lfoIdToModify == 1 ? lfo : vibratoLfo;
+    
     switch (lfoShapeId) {
         case 0: // Saw up
-            lfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, -1.0f, 1.0f); }, 2);
+            lfoToModify.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, -1.0f, 1.0f); }, 2);
             break;
         case 1: // Saw down
-            lfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
+            lfoToModify.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
             break;
         case 2: // Tri
-            lfo.initialise([](float x) { // triangle
+            lfoToModify.initialise([](float x) { // triangle
                 if (x < 0.0f) {
                     return juce::jmap (x, -juce::MathConstants<float>::pi, 0.0f, -1.0f, 1.0f);
                 } else {
@@ -233,7 +235,7 @@ void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rate
             }, 3);
             break;
         case 3: // Square
-            lfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
+            lfoToModify.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
             break;
             // TODO: Add a noise option
         default:
@@ -241,38 +243,8 @@ void SynthVoice::setFilterLFOParams(int lfoShapeId, float ampPercent, float rate
             break;
     }
     
-    lfoCutoffDepth = ampPercent; // 0.0 to 1.0
-    lfo.setFrequency(rateHz);
-}
-
-void SynthVoice::setVibratoParams(int lfoShapeId, float ampPercent, float rateHz) {
-    switch (lfoShapeId) {
-        case 0: // Saw up
-            vibratoLfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, -1.0f, 1.0f); }, 2);
-            break;
-        case 1: // Saw down
-            vibratoLfo.initialise([] (float x) { return juce::jmap (x, -juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, 1.0f, -1.0f); }, 2);
-            break;
-        case 2: // Tri
-            vibratoLfo.initialise([](float x) { // triangle
-                if (x < 0.0f) {
-                    return juce::jmap (x, -juce::MathConstants<float>::pi, 0.0f, -1.0f, 1.0f);
-                } else {
-                    return juce::jmap (x, 0.0f, juce::MathConstants<float>::pi, 1.0f, -1.0f);
-                }
-            }, 3);
-            break;
-        case 3: // Square
-            vibratoLfo.initialise ([] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 128);
-            break;
-        // TODO: Add a noise option
-        default:
-            jassertfalse;
-            break;
-    }
-    
-    vibratoDepth = ampPercent; // 0.0 to 1.0
-    vibratoLfo.setFrequency(rateHz);
+    (lfoIdToModify == 1 ? lfoCutoffDepth : vibratoDepth) = ampPercent;
+    lfoToModify.setFrequency(rateHz);
 }
 
 // Envelope Module Setters

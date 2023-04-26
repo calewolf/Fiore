@@ -157,21 +157,15 @@ void OscillatorModule::buttonClicked(Button* button) {
     }
     if (button == &sawButton1) {
         apvts.getParameterAsValue("OSC1_WAVE") = 0;
-        std::cout << "1" << std::endl;
     } else if (button == &squareButton1) {
         apvts.getParameterAsValue("OSC1_WAVE") = 1;
-        std::cout << "2" << std::endl;
     } else if (button == &noiseButton1) {
         apvts.getParameterAsValue("OSC1_WAVE") = 3;
-        std::cout << "3" << std::endl;
     } else if (button == &sawButton2) {
         apvts.getParameterAsValue("OSC2_WAVE") = 0;
-        std::cout << "4" << std::endl;
     } else if (button == &squareButton2) {
         apvts.getParameterAsValue("OSC2_WAVE") = 1;
-        std::cout << "5" << std::endl;
     } else if (button == &triButton2) {
         apvts.getParameterAsValue("OSC2_WAVE") = 2;
-        std::cout << "6" << std::endl;
     }
 }

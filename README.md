@@ -15,7 +15,7 @@ I built this synth as a senior capstone project for my degree in Computer Scienc
 
 ### Installation 🎛️
 
-**Download: [VST3]() or [AU]()** (links coming soon)
+**Download: [VST3 or AU](https://drive.google.com/drive/folders/13Lbz1v___eVtjWiPUFKlm65ORKPyT9KW?usp=sharing)**
 
 To build and run the synth from it's source code:
 1. [Download JUCE](https://juce.com/get-juce/)

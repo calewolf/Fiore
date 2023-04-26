@@ -38,8 +38,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         void setFilterParams(float cutoffHz, float resonance, float driveAmt, float envAmt);
         void setFilterOnOff(bool filterShouldBeOn);
         void setMasterGain(float decibels);
-        void setFilterLFOParams(int lfoShapeId, float ampPercent, float rateHz);
-        void setVibratoParams(int lfoShapeId, float ampPercent, float rateHz);
+        void setLFOParams(int lfoShapeId, float ampPercent, float rateHz, int lfoIdToModify);
         void setAmpADSR(float attack, float decay, float sustain, float release);
         void setFilterADSR(float attack, float decay, float sustain, float release);
         
