@@ -70,13 +70,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     juce::dsp::AudioBlock<float> sineAudioBlock {sineBuffer};
     
    // 1. Adjust the oscillators' frequencies with vibrato, detune, and pitch wheel
-    std::cout << "Cur pitch wheel val: " << pitchWheelDetuneSemitones << std::endl;
     float adjustedBaseFreq = getNewFreqFromVibratoLFO(numSamples);
-    float totalOsc1Detune = osc1DetuneSemitones + pitchWheelDetuneSemitones;
-    float totalOsc2Detune = osc2DetuneSemitones + pitchWheelDetuneSemitones;
-    osc1.setFrequency(adjustedBaseFreq * pow(2, totalOsc1Detune / 12.0), true);
-    osc2.setFrequency(adjustedBaseFreq * pow(2, totalOsc2Detune / 12.0), true);
-    sineOsc.setFrequency(adjustedBaseFreq, true);
+    osc1.setFrequency(adjustedBaseFreq * pow(2, (osc1DetuneSemitones + pitchWheelDetuneSemitones) / 12.0), true);
+    osc2.setFrequency(adjustedBaseFreq * pow(2, (osc2DetuneSemitones + pitchWheelDetuneSemitones) / 12.0), true);
+    sineOsc.setFrequency(adjustedBaseFreq * pow(2, pitchWheelDetuneSemitones / 12.0), true);
     
     // 1. Get sounds from the oscillators and add them
     osc1.process(juce::dsp::ProcessContextReplacing<float> (osc1AudioBlock));
@@ -134,14 +131,12 @@ float SynthVoice::getCutoffFromEnvAndLFO(int numSamples) {
     lfoOut /= ((float) numSamples);
     avgFiltAdsrOut /= ((float) numSamples);
     
-    // 2.1 Modify the base cutoff according to the current env value and maximum env depth
-    auto baseCutoffMultiplier = juce::jmap(avgFiltAdsrOut, 0.0f, 1.0f, 1.0f - filterEnvDepth, 1.0f);
+    // 2.1 Get multiplier from the filter envelope. At 100% amplitude, it controls the cutoff from x0 to x1
+    auto adsrMultiplier = juce::jmap(avgFiltAdsrOut, 0.0f, 1.0f, 1.0f - filterEnvDepth, 1.0f);
+    // 2.2 Get multiplier from LFO. At 100% amplitude, it can either x.25 or x4 the cutoff
+    float lfoMultiplier = pow(juce::jmap(lfoCutoffDepth, 0.0f, 1.0f, 1.0f, 4.0f), lfoOut);
     
-    // 2.2 Add/subtract from the base cutoff according to the LFO value
-    // FIXME: This is mapping from 0 to 1000 Hz. This needs to exist on an exponential scale.
-    auto cutoffMod = juce::jmap(lfoCutoffDepth, 0.0f, 1.0f, 0.0f, 1000.0f) * lfoOut;
-    auto newCutoff = (baseCutoffHz * baseCutoffMultiplier) + cutoffMod;
-    return juce::jmin(juce::jmax(newCutoff, 20.0f), 20000.0f);
+    return juce::jmin(juce::jmax(baseCutoffHz * adsrMultiplier * lfoMultiplier, 20.0f), 20000.0f);
 }
 
 // OSC Module Setters
