@@ -1,7 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
 #include "CustomOsc.h"
-#include "CustomADSR.h"
 
 /**
     This class is kind of useless but is required by the Synthesiser class.

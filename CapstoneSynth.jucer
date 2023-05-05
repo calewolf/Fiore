@@ -23,8 +23,6 @@
         <FILE id="NLiJ8h" name="OscillatorModule.h" compile="0" resource="0"
               file="Source/OscillatorModule.h"/>
       </GROUP>
-      <FILE id="ocUJ0q" name="CustomADSR.cpp" compile="1" resource="0" file="Source/CustomADSR.cpp"/>
-      <FILE id="u5Jwjt" name="CustomADSR.h" compile="0" resource="0" file="Source/CustomADSR.h"/>
       <FILE id="FZRGNx" name="CustomOsc.h" compile="0" resource="0" file="Source/CustomOsc.h"/>
       <FILE id="pPYfkx" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
       <FILE id="ZhTdpF" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>

@@ -1,6 +1,7 @@
 #include "SynthVoice.h"
 
-SynthVoice::SynthVoice() {}
+SynthVoice::SynthVoice() {
+}
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound) {
     return dynamic_cast<juce::SynthesiserSound*>(sound) != nullptr;
