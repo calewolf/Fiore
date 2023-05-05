@@ -28,6 +28,9 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 }
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) {
+    lfo.reset();
+    vibratoLfo.reset();
+    
     baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     osc1.setLevel(velocity * osc1MixRatio);
     osc2.setLevel(velocity * (1.0 - osc1MixRatio));
