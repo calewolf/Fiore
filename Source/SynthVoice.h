@@ -1,6 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "CustomOsc.h"
+#include "CustomADSR.h"
 
 /**
     This class is kind of useless but is required by the Synthesiser class.
@@ -60,6 +61,7 @@ class SynthVoice: public juce::SynthesiserVoice {
         juce::ADSR filterAdsr;
         juce::dsp::Oscillator<float> lfo;
         juce::dsp::Oscillator<float> vibratoLfo;
+        juce::dsp::Limiter<float> limiter;
     
         // Helper Variables
         /// The mix between OSC1 and OSC2. 1.0 = 100% OSC1.

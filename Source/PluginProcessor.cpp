@@ -48,7 +48,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     params.push_back(std::make_unique<juce::AudioParameterChoice>(ParameterID("FILT_TYPE", 1), "Filter Type", juce::StringArray {"LPF12", "HPF12", "BPF12", "LPF24", "HPF24", "BPF24"}, 0));
     juce::NormalisableRange<float> cutoffRange {20.0, 10000.0, 1.0};
     cutoffRange.setSkewForCentre(500.0);
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_CUTOFF", 1), "Cutoff", cutoffRange, 500.0));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(ParameterID("FILT_CUTOFF", 1), "Cutoff", cutoffRange, 1000.0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_RESO", 1), "Resonance", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_DRIVE_AMT", 1), "Filter Drive Amount", 0, 100, 0));
     params.push_back(std::make_unique<juce::AudioParameterInt>(ParameterID("FILT_ENV_AMT", 1), "Filter Envelope Amount", 0, 100, 0));

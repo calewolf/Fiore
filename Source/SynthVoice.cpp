@@ -20,6 +20,9 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     filter.prepare(spec);
     lfo.prepare(spec);
     vibratoLfo.prepare(spec);
+    limiter.prepare(spec);
+    limiter.setThreshold(-0.1f);
+    limiter.setRelease(1000);
     
     sineOsc.setWaveform(4);
     adsr.setSampleRate(sampleRate);
@@ -32,12 +35,12 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     vibratoLfo.reset();
     
     baseFreqHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    osc1.setLevel(velocity * osc1MixRatio);
-    osc2.setLevel(velocity * (1.0 - osc1MixRatio));
-    sineOsc.setLevel(velocity * sineLevel);
+    osc1.setLevel(velocity * 0.15 * osc1MixRatio);
+    osc2.setLevel(velocity * 0.15 * (1.0 - osc1MixRatio));
+    sineOsc.setLevel(velocity * 0.15 * sineLevel);
     adsr.noteOn();
     filterAdsr.noteOn();
-    currentVelocity = velocity * 0.5;
+    currentVelocity = velocity * 0.15;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff) {
@@ -93,6 +96,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     
     // 3. Apply amplitude ADSR
     adsr.applyEnvelopeToBuffer(osc2Buffer, 0, osc2Buffer.getNumSamples());
+    
+    // Limit with a limiter at this point! Otherwise it can get way too loud!
+    limiter.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
     
     // 4. Apply master gain
     masterGain.process(juce::dsp::ProcessContextReplacing<float>(osc2AudioBlock));
