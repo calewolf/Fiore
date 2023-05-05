@@ -70,6 +70,8 @@ class SynthVoice: public juce::SynthesiserVoice {
         float currentVelocity;
         /// The frequency from the last time `startNote` was called.
         float baseFreqHz;
+        /// The number of semitones the pitch wheel has set the synth to detune by
+        float pitchWheelDetuneSemitones { 0.0 };
         /// The amount of semitones to detune Oscillator 2 by.
         float osc2DetuneSemitones;
         /// The amount of semitones to detune Oscillator 1 by.

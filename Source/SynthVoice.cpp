@@ -46,11 +46,10 @@ void SynthVoice::stopNote(float velocity, bool allowTailOff) {
 }
 
 void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue) {
-    
 }
 
 void SynthVoice::pitchWheelMoved(int newPitchWheelValue) {
-    
+    pitchWheelDetuneSemitones = juce::jmap((float) newPitchWheelValue, 0.0f, 16383.0f, -2.0f, 2.0f);;
 }
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) {
@@ -70,10 +69,13 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     juce::dsp::AudioBlock<float> osc2AudioBlock {osc2Buffer};
     juce::dsp::AudioBlock<float> sineAudioBlock {sineBuffer};
     
-   // 1. Adjust the oscillators' frequencies with vibrato
+   // 1. Adjust the oscillators' frequencies with vibrato, detune, and pitch wheel
+    std::cout << "Cur pitch wheel val: " << pitchWheelDetuneSemitones << std::endl;
     float adjustedBaseFreq = getNewFreqFromVibratoLFO(numSamples);
-    osc1.setFrequency(adjustedBaseFreq * pow(2, osc1DetuneSemitones / 12.0), true);
-    osc2.setFrequency(adjustedBaseFreq * pow(2, osc2DetuneSemitones / 12.0), true);
+    float totalOsc1Detune = osc1DetuneSemitones + pitchWheelDetuneSemitones;
+    float totalOsc2Detune = osc2DetuneSemitones + pitchWheelDetuneSemitones;
+    osc1.setFrequency(adjustedBaseFreq * pow(2, totalOsc1Detune / 12.0), true);
+    osc2.setFrequency(adjustedBaseFreq * pow(2, totalOsc2Detune / 12.0), true);
     sineOsc.setFrequency(adjustedBaseFreq, true);
     
     // 1. Get sounds from the oscillators and add them
@@ -101,6 +103,12 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
     
     if (!adsr.isActive()) {
+        /*
+         FIXME: Resetting the pitch wheel here produces a bug where pressing a note while the pitch wheel is already held at a certain non-zero value
+         makes it so that the pitch wheel doesn't have an effect until the wheel is moved.
+         A solution could be adjusting the frequency in `pitchWheelMoved` but I don't like that.
+         */
+        pitchWheelDetuneSemitones = 0;
         clearCurrentNote();
     }
 }
