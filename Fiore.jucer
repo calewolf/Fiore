@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="IrO9Jp" name="Capstone Synth" projectType="audioplug" useAppConfig="0"
+<JUCERPROJECT id="IrO9Jp" name="Fiore" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" displaySplashScreen="1" jucerFormatVersion="1"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               companyName="calesplugins">
-  <MAINGROUP id="r0AylI" name="Capstone Synth">
+  <MAINGROUP id="r0AylI" name="Fiore">
     <GROUP id="{DCF86FA3-59A6-7823-1502-BB8229A76F32}" name="Source">
       <GROUP id="{187C7D2A-896F-89E9-34CA-841C75700541}" name="Components">
         <FILE id="bUZeUA" name="AmpModule.cpp" compile="1" resource="0" file="Source/AmpModule.cpp"/>

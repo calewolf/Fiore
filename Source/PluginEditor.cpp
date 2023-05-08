@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-Editor::Editor (CapstoneSynthAudioProcessor& p):
+Editor::Editor (FioreAudioProcessor& p):
         AudioProcessorEditor (&p), audioProcessor (p),
 oscModule(p.getAPVTS()), filterModule(p.getAPVTS()), lfoVibratoModule(p.getAPVTS()), envModule(p.getAPVTS()), ampModule(p.getAPVTS())
 {

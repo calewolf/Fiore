@@ -7,10 +7,10 @@
     The main entrypoint class for handing audio processing for the synth.
     It wraps the Sythesiser class and handles all audio parameters that interface with the GUI.
 */
-class CapstoneSynthAudioProcessor  : public juce::AudioProcessor {
+class FioreAudioProcessor  : public juce::AudioProcessor {
 public:
-    CapstoneSynthAudioProcessor();
-    ~CapstoneSynthAudioProcessor() override;
+    FioreAudioProcessor();
+    ~FioreAudioProcessor() override;
     
     // AudioProcessor overrides
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -44,5 +44,5 @@ private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     void updateParams();
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CapstoneSynthAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FioreAudioProcessor)
 };

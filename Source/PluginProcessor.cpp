@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
+FioreAudioProcessor::FioreAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -20,9 +20,9 @@ CapstoneSynthAudioProcessor::CapstoneSynthAudioProcessor()
     synth.setNoteStealingEnabled(true);
 }
 
-CapstoneSynthAudioProcessor::~CapstoneSynthAudioProcessor() {}
+FioreAudioProcessor::~FioreAudioProcessor() {}
 
-void CapstoneSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
+void FioreAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     synth.setCurrentPlaybackSampleRate(sampleRate);
     
     for (int i = 0; i < synth.getNumVoices(); i++) {
@@ -32,7 +32,7 @@ void CapstoneSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     }
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor::createParams() {
+juce::AudioProcessorValueTreeState::ParameterLayout FioreAudioProcessor::createParams() {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
     
     // Oscillator Module Params
@@ -90,7 +90,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CapstoneSynthAudioProcessor:
     return { params.begin(), params.end() };
 }
 
-void CapstoneSynthAudioProcessor::updateParams() {
+void FioreAudioProcessor::updateParams() {
     for (int i = 0; i < synth.getNumVoices(); i++) {
         if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i))) {
             
@@ -149,7 +149,7 @@ void CapstoneSynthAudioProcessor::updateParams() {
     }
 }
 
-void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+void FioreAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
     // Clear garbage from buffers for when # outputs > # inputs. Otherwise feedback!
     for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i) {
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -163,22 +163,22 @@ void CapstoneSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
-void CapstoneSynthAudioProcessor::releaseResources() {
+void FioreAudioProcessor::releaseResources() {
     
 }
 
-juce::AudioProcessorValueTreeState& CapstoneSynthAudioProcessor::getAPVTS() {
+juce::AudioProcessorValueTreeState& FioreAudioProcessor::getAPVTS() {
     return apvts;
 }
 
 //==============================================================================
 // JUCE Auto-Generated Stuff (don't touch)
 
-const juce::String CapstoneSynthAudioProcessor::getName() const {
+const juce::String FioreAudioProcessor::getName() const {
     return JucePlugin_Name;
 }
 
-bool CapstoneSynthAudioProcessor::acceptsMidi() const {
+bool FioreAudioProcessor::acceptsMidi() const {
    #if JucePlugin_WantsMidiInput
     return true;
    #else
@@ -186,7 +186,7 @@ bool CapstoneSynthAudioProcessor::acceptsMidi() const {
    #endif
 }
 
-bool CapstoneSynthAudioProcessor::producesMidi() const {
+bool FioreAudioProcessor::producesMidi() const {
    #if JucePlugin_ProducesMidiOutput
     return true;
    #else
@@ -194,7 +194,7 @@ bool CapstoneSynthAudioProcessor::producesMidi() const {
    #endif
 }
 
-bool CapstoneSynthAudioProcessor::isMidiEffect() const {
+bool FioreAudioProcessor::isMidiEffect() const {
    #if JucePlugin_IsMidiEffect
     return true;
    #else
@@ -202,31 +202,31 @@ bool CapstoneSynthAudioProcessor::isMidiEffect() const {
    #endif
 }
 
-double CapstoneSynthAudioProcessor::getTailLengthSeconds() const {
+double FioreAudioProcessor::getTailLengthSeconds() const {
     return 0.0;
 }
 
-int CapstoneSynthAudioProcessor::getNumPrograms() {
+int FioreAudioProcessor::getNumPrograms() {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int CapstoneSynthAudioProcessor::getCurrentProgram() {
+int FioreAudioProcessor::getCurrentProgram() {
     return 0;
 }
 
-void CapstoneSynthAudioProcessor::setCurrentProgram (int index) {
+void FioreAudioProcessor::setCurrentProgram (int index) {
 }
 
-const juce::String CapstoneSynthAudioProcessor::getProgramName (int index) {
+const juce::String FioreAudioProcessor::getProgramName (int index) {
     return {};
 }
 
-void CapstoneSynthAudioProcessor::changeProgramName (int index, const juce::String& newName) {
+void FioreAudioProcessor::changeProgramName (int index, const juce::String& newName) {
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool CapstoneSynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const {
+bool FioreAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
     return true;
@@ -250,22 +250,22 @@ bool CapstoneSynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 }
 #endif
 
-bool CapstoneSynthAudioProcessor::hasEditor() const {
+bool FioreAudioProcessor::hasEditor() const {
     return true;
 }
 
-juce::AudioProcessorEditor* CapstoneSynthAudioProcessor::createEditor() {
+juce::AudioProcessorEditor* FioreAudioProcessor::createEditor() {
     return new Editor (*this);
 }
 
-void CapstoneSynthAudioProcessor::getStateInformation (juce::MemoryBlock& destData) {
+void FioreAudioProcessor::getStateInformation (juce::MemoryBlock& destData) {
     // From juce tutorial: https://docs.juce.com/master/tutorial_audio_processor_value_tree_state.html
     auto state = apvts.copyState();
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
-void CapstoneSynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
+void FioreAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
     // From juce tutorial: https://docs.juce.com/master/tutorial_audio_processor_value_tree_state.html
     std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState.get() != nullptr) {
@@ -276,5 +276,5 @@ void CapstoneSynthAudioProcessor::setStateInformation (const void* data, int siz
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
-    return new CapstoneSynthAudioProcessor();
+    return new FioreAudioProcessor();
 }

@@ -14,13 +14,13 @@
 */
 class Editor: public AudioProcessorEditor {
     public:
-        Editor(CapstoneSynthAudioProcessor&);
+        Editor(FioreAudioProcessor&);
         ~Editor() override;
         void paint(juce::Graphics&) override;
         void resized() override;
 
     private:
-        CapstoneSynthAudioProcessor& audioProcessor;
+        FioreAudioProcessor& audioProcessor;
         
         OscillatorModule oscModule;
         FilterModule filterModule;
